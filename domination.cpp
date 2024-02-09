@@ -41,7 +41,7 @@
 
 void dominationMain()
 {
-  
+  //test
     setScren();
     time = millis();
     lastScreenRefresigh = millis();
