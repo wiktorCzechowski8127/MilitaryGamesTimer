@@ -5,6 +5,7 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);  // set the LCD address to 0x20 for a 16 chars and 2 line display
 
+// To change
 // Both sites
 byte filled[8] = {
   B00000,
