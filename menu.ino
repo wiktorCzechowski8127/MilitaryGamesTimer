@@ -1,35 +1,302 @@
 #include "menu.hpp"
 #include <LiquidCrystal_I2C.h>
+#include "buttons.hpp"
+
 
 extern LiquidCrystal_I2C lcd;
 
-void setTime(msTimeT* timeToModify)
+
+void startGame(menuBaseS* menuBase)
 {
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("USTAW CZAS");
-    while(true)
+    if(menuBase->navigation.menuPosition[0] == BOMB_GAMEMODE)
     {
-        //upButton.loop();
-        if(true)
-        {   
-            Serial.print("in");
-            delay(2000);
-            break;
+        bool startButtonKeepPushed = false;
+        unsigned long pushingTime = 0;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("STARTUJE TRYB");
+        lcd.setCursor(0,1);
+        lcd.print("BOMBY");
+        while (true)
+        {
+            startButtonKeepPushed = false;
+            if(buttonPushed(UP_BUTTON))
+            {
+                Serial.println("up");
+                break;
+            }
+            if(digitalRead(DOWN_BUTTON) == 0)
+            {
+                startButtonKeepPushed = true;
+                if(pushingTime == 0)
+                {
+                    pushingTime = millis();
+                }
+            }
+
+            if(startButtonKeepPushed == true)
+            {
+                if(millis() > (pushingTime + 3000))
+                {
+                    lcd.clear();
+                    lcd.setCursor(0,0);
+                    lcd.print("WYSTARTOWANO");
+                    while(1);
+                }
+                else
+                {   
+                    lcd.setCursor(13,1);
+                    if(millis() > (pushingTime + 0)) lcd.print(".");
+                    if(millis() > (pushingTime + 1000)) lcd.print(".");
+                    if(millis() > (pushingTime + 2000)) lcd.print(".");
+                }
+            }
+            else
+            {
+                lcd.setCursor(13,1);
+                lcd.print("   ");
+                pushingTime = 0;
+            }
         }
     }
 }
 
+/* > Function validateTime
+*******************************************************************************/
+/**
+ * @brief Proceding tresholds on time.
+ * 
+ * @param[in] time      Time param to procede.
+ * @return void
+ * 
+*******************************************************************************/
+void validateTime(humanTimeT* time)
+{
+    if(*time > 65515)
+    {
+        *time = 0;
+    }
+    else if(*time > 60)
+    {
+        *time = 60;
+    }
+}
+
+/* > Function setTime
+*******************************************************************************/
+/**
+ * @brief Setting time of gamemode option.
+ * 
+ * @param[in] timeInMs     Pointer to time in Ms to set.
+ * @param[in] minutesOnly  Information about using only minutes and seconds.
+ * @return void
+ * 
+*******************************************************************************/
+void setTime(msTimeT* timeToModify, bool minutesOnly)
+{
+    // Initializing variables
+    char valueToPrint[15] = "";
+    humanTimeT hours;
+    humanTimeT minutes;
+    humanTimeT seconds;
+    convertMsTo3var(timeToModify, &hours, &minutes, &seconds);
+
+    unsigned short cursorPosition = 0;
+    unsigned short monthOnlyPositionTreshold = 0;
+
+    bool isButtonPushed = false;
+    bool isUpOrDownButtonPused = false;
+    short operand = 1;
+
+    // Printing status on lcd
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("USTAW CZAS");
+    if (minutesOnly)
+    {
+        cursorPosition = 3;
+        monthOnlyPositionTreshold = 3;
+        snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d", minutes, seconds);
+    }
+    else
+    {
+        cursorPosition = 0;
+        monthOnlyPositionTreshold = 0;
+        snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d:%02d", hours, minutes, seconds);       
+    }
+    lcd.setCursor(0,1);
+    lcd.print(valueToPrint);
+    lcd.setCursor(cursorPosition - monthOnlyPositionTreshold,1);
+    lcd.blink();
+
+    // Main function loop
+    while(true)
+    {
+        isUpOrDownButtonPused = false;
+        isButtonPushed = false;
+
+        // Reading button status
+        if(buttonPushed(UP_BUTTON))
+        {
+            Serial.println("up");
+            isButtonPushed = true;
+            isUpOrDownButtonPused = true;
+            operand = 1;
+        }
+        if(buttonPushed(DOWN_BUTTON))
+        {
+            isButtonPushed = true;
+            isUpOrDownButtonPused = true;
+            operand = -1;
+        }
+        if(buttonPushed(RIGHT_BUTTON))
+        {
+            isButtonPushed = true;
+            cursorPosition++;
+            if(cursorPosition == 2 || cursorPosition == 5)
+            {
+                cursorPosition++;
+            }
+        }
+        if(buttonPushed(LEFT_BUTTON))
+        {
+            isButtonPushed = true;
+            cursorPosition--;
+            if(cursorPosition == 2 || cursorPosition == 5)
+            {
+                cursorPosition--;               
+            }
+        }
+
+        // Proceding up/down buttons
+        if(isUpOrDownButtonPused)
+        {
+            switch (cursorPosition)
+            {
+            case HOURS_TENS:
+                hours += (TEENS * operand);
+                validateTime(&hours);
+                break;
+            case HOURS_UNITS:
+                hours += (UNITS * operand);
+                validateTime(&hours);
+                break;
+            case MINUTES_TENS:
+                minutes += (TEENS * operand);
+                validateTime(&minutes);
+                break;
+            case MINUTES_UNITS:
+                minutes += (UNITS * operand);
+                validateTime(&minutes);
+                break;
+            case SECONDS_TENS:
+                seconds += (TEENS * operand);
+                validateTime(&seconds);
+                break;
+            case SECONDS_UNTIS:
+                seconds += (UNITS * operand);
+                validateTime(&seconds);
+                break;
+            default:
+                break;
+            }
+        }
+
+        // Printing status on lcd
+        if(isButtonPushed)
+        {   
+            if (cursorPosition >= TIME_CHARACTERS || cursorPosition < monthOnlyPositionTreshold)
+            {
+                convert3varToMs(hours, minutes, seconds, timeToModify);
+                lcd.noBlink();
+                break;
+            }
+            if (minutesOnly)
+            {
+                snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d", minutes, seconds);
+            }
+            else
+            {
+                snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d:%02d", hours, minutes, seconds);       
+            }
+            lcd.setCursor(0,1);
+            lcd.print(valueToPrint);
+            lcd.setCursor(cursorPosition - monthOnlyPositionTreshold,1);
+            lcd.blink();
+        }
+    }
+}
+
+/* > Function setBoolean
+*******************************************************************************/
+/**
+ * @brief Setting boolean option of gamemode .
+ * 
+ * @param[in] timeInMs     Pointer to time in Ms to set.
+ * @param[in] minutesOnly  Information about using only minutes and seconds.
+ * @return void
+ * 
+*******************************************************************************/
+void setBoolean(bool* option)
+{
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("USTAW STATUS");
+    printBoolOption(option);
+    lcd.setCursor(BOOL_OPTION_CURSOR_POS,1);
+
+    while(true)
+    {
+        // Reading button status
+        if(buttonPushed(UP_BUTTON))
+        {
+            break;
+        }
+        if(buttonPushed(RIGHT_BUTTON))
+        {
+            *option = !*option;
+            Serial.println("right  ");
+            Serial.print(*option);  
+            printBoolOption(option);
+        }
+        if(buttonPushed(LEFT_BUTTON))
+        {
+            Serial.print("left  ");
+            *option = !*option;
+            Serial.print(*option);  
+            printBoolOption(option);
+        }
+    }
+}
+/* > Function convertMsTo3var
+*******************************************************************************/
+/**
+ * @brief Converting ms to hours, minutes and seconds.
+ * 
+ * @param[in] hours     Hours in human format.
+ * @param[in] minutes   Minutes in human format.
+ * @param[in] seconds   Seconds in human format.
+ * @param[in] timeInMs  Time in Ms to covert.
+ * @return void
+ * 
+*******************************************************************************/
+void convert3varToMs(humanTimeT hours,
+                     humanTimeT minutes,
+                     humanTimeT seconds,
+                     msTimeT* timeInMs)
+{
+    *timeInMs = (hours * HOURS_IN_MS + minutes * MINUTES_IN_MS + seconds * SECONDS_IN_MS);
+}
 
 /* > Function convertMsTo3var
 *******************************************************************************/
 /**
  * @brief Converting ms to hours, minutes and seconds.
  * 
- * @param[in] timeInMs     Time in Ms to covert.
- * @param[in] hours     Time in Ms to covert.
- * @param[in] minutes     Time in Ms to covert.
- * @param[in] seconds     Time in Ms to covert.
+ * @param[in] timeInMs    Time in Ms to covert.
+ * @param[in] hours       Hours in human format.
+ * @param[in] minutes     Minutes in human format.
+ * @param[in] seconds     Seconds in human format.
  * @return void
  * 
 *******************************************************************************/
@@ -46,7 +313,7 @@ void convertMsTo3var(const msTimeT* const timeInMs,
 /* > Function printTime
 *******************************************************************************/
 /**
- * @brief Printing time as option.
+ * @brief Printing time of option on lcd.
  * 
  * @param[in] timeInMs      Time in Ms to print.
  * @param[in] minutesOlny   Printing time without hours.
@@ -71,6 +338,28 @@ void printTime(const msTimeT* const timeInMs, bool minutesOnly)
     lcd.print(valueToPrint);
 }
 
+/* > Function printBoolOption
+*******************************************************************************/
+/**
+ * @brief Printing boolean status of option on lcd.
+ * 
+ * @param[in] option        Status to modify
+ * @return void
+ * 
+*******************************************************************************/
+void printBoolOption(const bool* const option)
+{
+    lcd.setCursor(BOOL_OPTION_CURSOR_POS,1);
+    if(*option == true)
+    {
+        lcd.print("TAK");
+    }
+    else
+    {
+        lcd.print("NIE");
+    }
+}
+
 /* > Function setBombGamemodeDomination
 *******************************************************************************/
 /**
@@ -83,8 +372,10 @@ void printTime(const msTimeT* const timeInMs, bool minutesOnly)
 void setDefaultGamemodeBomb(gamemodeBombS* gm)
 {
     gm->gameTime = (0 * HOURS_IN_MS + 50 * MINUTES_IN_MS + 45 * SECONDS_IN_MS);
-    gm->fullTakeOverTime = 20;
-    gm->takeOverTime = 30;
+    gm->armingTime = (0 * HOURS_IN_MS + 50 * MINUTES_IN_MS + 40 * SECONDS_IN_MS);
+    gm->defusingTime = (0 * HOURS_IN_MS + 50 * MINUTES_IN_MS + 35 * SECONDS_IN_MS);
+    gm->enableSwitch = true;
+    gm->slowReversing = false;
 }
 
 /* > Function setDefaultGamemodeDomination
@@ -101,6 +392,7 @@ void setDefaultGamemodeDomination(gamemodeDominationS* gm)
     gm->gameTime = (0 * HOURS_IN_MS + 45 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
     gm->fullTakeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 50 * SECONDS_IN_MS);
     gm->takeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 20 * SECONDS_IN_MS);
+    gm->enableSwitch = false;
 }
 
 /* > Function initializeMenu
@@ -145,10 +437,16 @@ void printBombOptions(const menuBaseS* const menuBase)
             printTime(&menuBase->gamemodeData.gamemodeBomb.gameTime, false);
             break;
         case 1:
-            printTime(&menuBase->gamemodeData.gamemodeBomb.fullTakeOverTime, true);
+            printTime(&menuBase->gamemodeData.gamemodeBomb.armingTime, true);
             break;
         case 2:
-            printTime(&menuBase->gamemodeData.gamemodeBomb.takeOverTime, true);
+            printTime(&menuBase->gamemodeData.gamemodeBomb.defusingTime, true);
+            break;
+        case 3:
+            printBoolOption(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
+            break;
+        case 4:
+            printBoolOption(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
             break;
         default:
             break;
@@ -167,10 +465,10 @@ void printBombOptions(const menuBaseS* const menuBase)
 void printDominationOptions(const menuBaseS* const menuBase)
 {       
         unsigned short position = menuBase->navigation.menuPosition[1];
+
         lcd.print((String)(menuBase->navigation.menuPosition[1] + 1) + 
                     ". " + 
                     menuBase->menuStrings.stringDomination[position]);
-
         lcd.setCursor(0,1);
         switch (position)
         {
@@ -183,6 +481,8 @@ void printDominationOptions(const menuBaseS* const menuBase)
         case 2:
             printTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true);
             break;
+        case 3:
+            printBoolOption(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
         default:
             break;
         }
@@ -291,32 +591,47 @@ void validateStage0Position(unsigned short* currentMenuPosition)
  * @return void
  * 
 *******************************************************************************/
-void validateStage1_1Position(menuNavigationS* navigation, gamemodeBombS* gm)
+void validateStage1_1Position(menuBaseS* menuBase)
 {
-    Serial.print("STAGE: ");
-    Serial.println(navigation->menuStage);
-    if(navigation->menuStage == 2)
+    if(menuBase->navigation.menuStage == 2)
     {
-        switch (navigation->menuPosition[1])
+        if(menuBase->navigation.menuPosition[2] > STAGE_1_1_OPTIONS)
+        {
+            menuBase->navigation.menuPosition[2] = STAGE_1_1_OPTIONS;
+        } //TODO
+        switch (menuBase->navigation.menuPosition[1])
         {
         case 0:
-            Serial.println("settingTime");
-            setTime(&gm->fullTakeOverTime);
+            setTime(&menuBase->gamemodeData.gamemodeBomb.gameTime, false);
             break;
-        
+        case 1:
+            setTime(&menuBase->gamemodeData.gamemodeBomb.armingTime, true);
+            break;
+        case 2:
+            setTime(&menuBase->gamemodeData.gamemodeBomb.defusingTime, true);
+            break;
+        case 3:
+            setBoolean(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
+            break;
+        case 4:
+            setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
+            break;
+        case 5:
+            startGame(menuBase);
+            break;    
         default:
             break;
         }
     }
     else
     {
-        if (navigation->menuPosition[1] == STAGE_1_1_OPTIONS)
+        if (menuBase->navigation.menuPosition[1] == STAGE_1_1_OPTIONS)
         {
-            navigation->menuPosition[1] = 0;
+            menuBase->navigation.menuPosition[1] = 0;
         }
-        else if (navigation->menuPosition[1] == 65535) //TODO change this
+        else if (menuBase->navigation.menuPosition[1] == 65535) //TODO change this
         {
-            navigation->menuPosition[1] = STAGE_1_1_OPTIONS - 1;
+            menuBase->navigation.menuPosition[1] = STAGE_1_1_OPTIONS - 1;
         }
     }
 }
@@ -332,17 +647,40 @@ void validateStage1_1Position(menuNavigationS* navigation, gamemodeBombS* gm)
  * @return void
  * 
 *******************************************************************************/
-void validateStage1_2Position(unsigned short* currentMenuPosition, gamemodeDominationS* gm)
+void validateStage1_2Position(menuBaseS* menuBase)
 {
-
-
-    if (*currentMenuPosition == STAGE_1_2_OPTIONS)
+    if(menuBase->navigation.menuStage == 2)
     {
-        *currentMenuPosition = 0;
+        switch (menuBase->navigation.menuPosition[1])
+        {
+        case 0:
+            setTime(&menuBase->gamemodeData.gamemodeDomination.gameTime, false);
+            break;
+        case 1:
+            setTime(&menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime, true);
+            break;
+        case 2:
+            setTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true);
+            break;
+        case 3:
+            setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
+            break;
+        case 4:
+            startGame(menuBase);
+        default:
+            break;
+        }
     }
-    else if (*currentMenuPosition == 65535) //TODO change this
+    else
     {
-        *currentMenuPosition = STAGE_1_2_OPTIONS - 1;
+        if (menuBase->navigation.menuPosition[1] == STAGE_1_2_OPTIONS)
+        {
+            menuBase->navigation.menuPosition[1] = 0;
+        }
+        else if (menuBase->navigation.menuPosition[1] == 65535) //TODO change this
+        {
+            menuBase->navigation.menuPosition[1] = STAGE_1_2_OPTIONS - 1;
+        }
     }
 }
 
@@ -356,32 +694,34 @@ void validateStage1_2Position(unsigned short* currentMenuPosition, gamemodeDomin
  * @return void
  * 
 *******************************************************************************/
-void validateMenuPositionWrapper(menuNavigationS* navigation,  gamemodeDataS* gamemodeData)
+void validateMenuPositionWrapper(menuBaseS* menuBase)
 {   
-    unsigned short stage = navigation->menuStage;
+    unsigned short stage = menuBase->navigation.menuStage;
     if (stage == 0)
     { 
-        validateStage0Position(&navigation->menuPosition[0]);
+        validateStage0Position(&menuBase->navigation.menuPosition[0]);
+        menuBase->navigation.menuPosition[1] = 0;
     }
     else if (stage == 1 || stage == 2)
     {
-        if (navigation->menuPosition[0] == 0)
+        if (menuBase->navigation.menuPosition[0] == 0)
         {
-            validateStage1_1Position(navigation, &gamemodeData->gamemodeBomb);
-            navigation->menuStage = 1;
+            validateStage1_1Position(menuBase);
+            menuBase->navigation.menuStage = 1;
         }
-        else if(navigation->menuPosition[0] == 1)
+        else if(menuBase->navigation.menuPosition[0] == 1)
         {
-            validateStage1_2Position(&navigation->menuPosition[1], &gamemodeData->gamemodeDomination);
+            validateStage1_2Position(menuBase);
+            menuBase->navigation.menuStage = 1;
         }
     }
     if (stage == MENU_STAGES)
     {
-        navigation->menuStage = MENU_STAGES - 1;
+        menuBase->navigation.menuStage = MENU_STAGES - 1;
     }
     else if (stage == 65535)
     {
-        navigation->menuStage = 0;        
+        menuBase->navigation.menuStage = 0;        
     }
 }
 
@@ -398,10 +738,6 @@ void processMenu()
 
     menuBaseS menuBase;
 
-    rightButton.setDebounceTime(50);
-    leftButton.setDebounceTime(50);
-    upButton.setDebounceTime(50);
-    downButton.setDebounceTime(50);
 
     initializeMenu(&menuBase);
     bool isButtonPushed = false;
@@ -409,40 +745,36 @@ void processMenu()
     while(true)
     {   
         isButtonPushed = false;
-        rightButton.loop();
-        leftButton.loop();
-        upButton.loop();
-        downButton.loop();
 
-        if(rightButton.isPressed())
+        if (buttonPushed(RIGHT_BUTTON))
         {
             Serial.println("right");
             isButtonPushed = true;
             menuBase.navigation.menuPosition[menuBase.navigation.menuStage]++;
         }
-        if(leftButton.isPressed())
+        if (buttonPushed(LEFT_BUTTON))
         {
-                        Serial.println("left");
+            Serial.println("left");
             isButtonPushed = true;
             menuBase.navigation.menuPosition[menuBase.navigation.menuStage]--;
         }
-        if(downButton.isPressed())
+        if (buttonPushed(DOWN_BUTTON))
         {
             Serial.println("down");
             isButtonPushed = true;
             menuBase.navigation.menuStage++;
             //menuBase.navigation.menuPosition[menuBase.navigation.menuStage] = 0;
         }
-        if(upButton.isPressed())
+        if (buttonPushed(UP_BUTTON))
         {
-                        Serial.println("up");
+            Serial.println("up");
             isButtonPushed = true;
             menuBase.navigation.menuStage--;
         }
 
         if(isButtonPushed)
         {
-            validateMenuPositionWrapper(&menuBase.navigation, &menuBase.gamemodeData);
+            validateMenuPositionWrapper(&menuBase);
             printMenu(&menuBase);
         }
     }

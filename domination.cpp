@@ -37,7 +37,6 @@ bool button = true;
 
 void dominationMain()
 {
-<<<<<<< HEAD
   
     setScren();
     time = millis();
@@ -46,16 +45,6 @@ void dominationMain()
                     " takeOverfFullFilledPerMs: " + (String)takeOverfFullFilledPerMs);
     Serial.println("takeOverSquares: " + (String)takeOverSquares +
                     " takeOverFullSquares: " + (String)takeOverFullSquares);
-=======
-  // test
-  setScren();
-  time = millis();
-  lastScreenRefresigh = millis();
-  Serial.println("takeOverfilledPerSec: " + (String)takeOverfilledPerSec +
-                 " takeOverfFullFilledPerMs: " + (String)takeOverfFullFilledPerMs);
-  Serial.println("takeOverSquares: " + (String)takeOverSquares +
-                 " takeOverFullSquares: " + (String)takeOverFullSquares);
->>>>>>> c452afa (Menu basic)
 
   // main loop
   bool isGameKeepRunning = true;

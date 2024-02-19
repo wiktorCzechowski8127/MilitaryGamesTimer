@@ -1,3 +1,4 @@
+
 //#include <ezButton.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -7,19 +8,14 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);  // set the LCD address to 0x20 for a 16 chars and 2 line display
 
-/*
-ezButton rightButton(8);
-ezButton leftButton(9);
-ezButton upButton(10);
-ezButton downButton(11);
-
-menuBaseS menuBase;
-*/
 
 void setup() {
   //butons
 
-
+  pinMode(8, INPUT_PULLUP);
+  pinMode(9, INPUT_PULLUP);
+  pinMode(10, INPUT_PULLUP);
+  pinMode(11, INPUT_PULLUP);
   // Lcd init
   lcd.init();
   lcd.backlight();
