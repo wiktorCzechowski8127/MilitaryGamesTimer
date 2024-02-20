@@ -1,9 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
-//#include <ezButton.h>
-//
-
+#include "common.hpp";
 /* > Defines ******************************************************************/
 #define AMMOUNT_OF_GAMEMODES 2
 #define MENU_STAGES 3
@@ -16,9 +14,7 @@
 #define BOMB_GAMEMODE 0
 #define DOMINATION_GAMEMODE 1
 
-#define HOURS_IN_MS 3600000
-#define MINUTES_IN_MS 60000
-#define SECONDS_IN_MS (unsigned long)1000
+
 #define TIME_CHARACTERS 8
 #define TIME_CHARACTERS_MINUTES_ONLY 6
 
@@ -35,8 +31,6 @@
 #define BOOL_OPTION_CURSOR_POS 4
 /* > Structures ***************************************************************/
 
-typedef unsigned long msTimeT;
-typedef unsigned short humanTimeT;
 /*******************************************************************************
  * struct: gamemodeBombS
  * 
@@ -76,7 +70,7 @@ struct gamemodeDominationS
 struct gamemodeDataS
 {   
     gamemodeBombS gamemodeBomb;
-    gamemodeDominationS gamemodeDomination;
+    gamemodeDominationS gamemodeDomination; 
 };
 
 /*******************************************************************************
@@ -139,12 +133,8 @@ void convert3varToMs(humanTimeT hours,
                      humanTimeT seconds,
                      msTimeT* timeInMs);
 
-void convertMsTo3var(const msTimeT* const timeInMs,
-                     humanTimeT* hours,
-                     humanTimeT* minutes,
-                     humanTimeT seconds);
 
-void printTime(const unsigned long* const timeInMs, bool minutesOnly);
+
 void printBoolOption(const bool* const option);
 
 void printBombOptions(const menuBaseS* const menuBase);

@@ -1,4 +1,5 @@
 #include "domination.hpp"
+#include "menu.hpp"
 
 extern LiquidCrystal_I2C lcd;
 
@@ -84,6 +85,10 @@ void dominationMain()
     }
     // END OF BUTTON PUSHED
 
+
+
+
+
     if ((lastScreenRefresigh + 125) < currentTime)
     {
       if (rightTeamProgressBarStage == 0)
@@ -166,4 +171,40 @@ void setScren()
     lcd.write(byte(charToPrint));
   }
   Serial.println("Screen is set");
+}
+
+
+void processDomination(const gamemodeDominationS* const gm)
+{
+  bool isGameRunning = true;
+  gamemodeTiming timing;
+  initializeTiming(&timing, &gm->gameTime);
+
+  while(isGameRunning)
+  {
+    timing.currentTime = millis();
+    Serial.println("TIMEDIFF: " + (String)(timing.currentTime - timing.lastCurrentTime)); //DEBUG
+    timing.lastCurrentTime = timing.currentTime; //DEBUG
+
+
+    isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
+    
+  }
+  /*
+  while(true)
+  {
+    lcd.setCursor(4,0);
+    lcd.print("KONIEC");
+  }
+  */
+}
+
+
+void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm)
+{
+    Serial.println("Dominacja ustawienia:");
+    Serial.println("gameTime: " + (String)gm->gameTime);
+    Serial.println("takeOverTime: " + (String)gm->takeOverTime);
+    Serial.println("fullTakeOverTime: " + (String)gm->fullTakeOverTime);
+    Serial.println("enableSwitch: " + (String)gm->enableSwitch);   
 }

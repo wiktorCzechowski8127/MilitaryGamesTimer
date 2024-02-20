@@ -31,8 +31,11 @@ void setup() {
 //bool isButtonPushed = false;
 
 void loop()
-{ 
-
+{
+  gamemodeDominationS gm;
+  setDefaultGamemodeDomination(&gm);
+  printGamemodeSettingsOnSerial(&gm);
+  processDomination(&gm);
   processMenu();
 
   //dominationMain();

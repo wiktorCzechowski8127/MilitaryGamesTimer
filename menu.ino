@@ -1,6 +1,7 @@
 #include "menu.hpp"
 #include <LiquidCrystal_I2C.h>
 #include "buttons.hpp"
+#include "common.hpp"
 
 
 extern LiquidCrystal_I2C lcd;
@@ -268,25 +269,7 @@ void setBoolean(bool* option)
         }
     }
 }
-/* > Function convertMsTo3var
-*******************************************************************************/
-/**
- * @brief Converting ms to hours, minutes and seconds.
- * 
- * @param[in] hours     Hours in human format.
- * @param[in] minutes   Minutes in human format.
- * @param[in] seconds   Seconds in human format.
- * @param[in] timeInMs  Time in Ms to covert.
- * @return void
- * 
-*******************************************************************************/
-void convert3varToMs(humanTimeT hours,
-                     humanTimeT minutes,
-                     humanTimeT seconds,
-                     msTimeT* timeInMs)
-{
-    *timeInMs = (hours * HOURS_IN_MS + minutes * MINUTES_IN_MS + seconds * SECONDS_IN_MS);
-}
+
 
 /* > Function convertMsTo3var
 *******************************************************************************/
@@ -310,33 +293,6 @@ void convertMsTo3var(const msTimeT* const timeInMs,
     *seconds = (*timeInMs - (*hours * HOURS_IN_MS) - (*minutes * MINUTES_IN_MS)) / SECONDS_IN_MS;
 }
 
-/* > Function printTime
-*******************************************************************************/
-/**
- * @brief Printing time of option on lcd.
- * 
- * @param[in] timeInMs      Time in Ms to print.
- * @param[in] minutesOlny   Printing time without hours.
- * @return void
- * 
-*******************************************************************************/
-void printTime(const msTimeT* const timeInMs, bool minutesOnly)
-{
-    humanTimeT hours;
-    humanTimeT minutes;
-    humanTimeT seconds;
-    convertMsTo3var(timeInMs, &hours, &minutes, &seconds);
-    char valueToPrint[15];
-    if (minutesOnly)
-    {
-        snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d", minutes, seconds);
-    }
-    else
-    {
-        snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d:%02d", hours, minutes, seconds);       
-    }
-    lcd.print(valueToPrint);
-}
 
 /* > Function printBoolOption
 *******************************************************************************/
@@ -389,7 +345,7 @@ void setDefaultGamemodeBomb(gamemodeBombS* gm)
 *******************************************************************************/
 void setDefaultGamemodeDomination(gamemodeDominationS* gm)
 {
-    gm->gameTime = (0 * HOURS_IN_MS + 45 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
+    gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
     gm->fullTakeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 50 * SECONDS_IN_MS);
     gm->takeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 20 * SECONDS_IN_MS);
     gm->enableSwitch = false;
