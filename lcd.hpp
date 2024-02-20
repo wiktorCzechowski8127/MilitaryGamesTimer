@@ -1,7 +1,10 @@
 #ifndef CHARACTERS_H
 #define CHARACTERS_H
 
-//------------------- Defines //-------------------
+/* > Include  *****************************************************************/
+#include <LiquidCrystal_I2C.h>
+
+/* > Defines ******************************************************************/
 // Characters
 #define FILLED 0
 #define RIGHT_STRIP 1
@@ -17,7 +20,14 @@
 #define FIRST_LEFT_PLACE 7
 #define FIRST_RIGHT_PLACE 8
 
-//------------------- Functions //-------------------
+/* > Typedefs *****************************************************************/
+
+/* > Externs ******************************************************************/
+extern LiquidCrystal_I2C lcd; // TODO - verify is that correct
+
+/* > Structures ***************************************************************/
+
+/* > Functions ****************************************************************/
 void createProgressBarCharacters();
 
 #endif

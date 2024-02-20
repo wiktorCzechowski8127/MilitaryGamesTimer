@@ -1,11 +1,4 @@
 #include "menu.hpp"
-#include <LiquidCrystal_I2C.h>
-#include "buttons.hpp"
-#include "common.hpp"
-
-
-extern LiquidCrystal_I2C lcd;
-
 
 void startGame(menuBaseS* menuBase)
 {
@@ -43,6 +36,59 @@ void startGame(menuBaseS* menuBase)
                     lcd.setCursor(0,0);
                     lcd.print("WYSTARTOWANO");
                     while(1);
+                }
+                else
+                {   
+                    lcd.setCursor(13,1);
+                    if(millis() > (pushingTime + 0)) lcd.print(".");
+                    if(millis() > (pushingTime + 1000)) lcd.print(".");
+                    if(millis() > (pushingTime + 2000)) lcd.print(".");
+                }
+            }
+            else
+            {
+                lcd.setCursor(13,1);
+                lcd.print("   ");
+                pushingTime = 0;
+            }
+        }
+    }
+    else if(menuBase->navigation.menuPosition[0] == DOMINATION_GAMEMODE)
+    {
+        bool startButtonKeepPushed = false;
+        unsigned long pushingTime = 0;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("STARTUJE TRYB");
+        lcd.setCursor(0,1);
+        lcd.print("DOMINACJI");
+        while (true)
+        {
+            startButtonKeepPushed = false;
+            if(buttonPushed(UP_BUTTON))
+            {
+                Serial.println("up");
+                break;
+            }
+            if(digitalRead(DOWN_BUTTON) == 0)
+            {
+                startButtonKeepPushed = true;
+                if(pushingTime == 0)
+                {
+                    pushingTime = millis();
+                }
+            }
+
+            if(startButtonKeepPushed == true)
+            {
+                if(millis() > (pushingTime + 3000))
+                {
+                    lcd.clear();
+                    lcd.setCursor(0,0);
+                    lcd.print("WYSTARTOWANO");
+                    processDomination(&menuBase->gamemodeData.gamemodeDomination);
+                    menuBase->navigation.menuStage = 0;
+                    break;
                 }
                 else
                 {   
@@ -697,6 +743,11 @@ void processMenu()
 
     initializeMenu(&menuBase);
     bool isButtonPushed = false;
+
+    //DEBUG
+    processDomination(&menuBase.gamemodeData.gamemodeDomination);
+    initializeMenu(&menuBase);
+    //DEBUG
 
     while(true)
     {   

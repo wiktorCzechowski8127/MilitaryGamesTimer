@@ -1,13 +1,9 @@
-
-//#include <ezButton.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include "domination.hpp"
 #include "lcd.hpp"
 #include "menu.hpp"
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);  // set the LCD address to 0x20 for a 16 chars and 2 line display
-
 
 void setup() {
   //butons
@@ -23,20 +19,10 @@ void setup() {
 
   // Serial init
   Serial.begin(115200);
-
-  //initializeMenu(&menuBase);
-  
 }
 
-//bool isButtonPushed = false;
 
 void loop()
 {
-  gamemodeDominationS gm;
-  setDefaultGamemodeDomination(&gm);
-  printGamemodeSettingsOnSerial(&gm);
-  processDomination(&gm);
   processMenu();
-
-  //dominationMain();
 }

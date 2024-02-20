@@ -1,7 +1,12 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "common.hpp";
+/* > Include  *****************************************************************/
+#include <LiquidCrystal_I2C.h>
+#include "common.hpp"
+#include "domination.hpp"
+#include "buttons.hpp"
+
 /* > Defines ******************************************************************/
 #define AMMOUNT_OF_GAMEMODES 2
 #define MENU_STAGES 3
@@ -29,7 +34,13 @@
 #define UNITS 1
 
 #define BOOL_OPTION_CURSOR_POS 4
+
+/* > Typedefs *****************************************************************/
+
+/* > Externs ******************************************************************/
+
 /* > Structures ***************************************************************/
+extern LiquidCrystal_I2C lcd;
 
 /*******************************************************************************
  * struct: gamemodeBombS
@@ -45,20 +56,6 @@ struct gamemodeBombS
     msTimeT defusingTime;
     bool enableSwitch;
     bool slowReversing;
-};
-
-/*******************************************************************************
- * struct: gamemodeDominationS
- * 
- * @brief Domination gamemode options. Ammount of options: 3
- * 
-*******************************************************************************/
-struct gamemodeDominationS
-{
-    msTimeT gameTime;
-    msTimeT fullTakeOverTime;
-    msTimeT takeOverTime;
-    bool enableSwitch;
 };
 
 /*******************************************************************************

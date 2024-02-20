@@ -4,8 +4,15 @@
 /* > Include  *****************************************************************/
 #include "common.hpp"
 #include <LiquidCrystal_I2C.h>
+
 /* > Defines ******************************************************************/
 
+/* > Typedefs *****************************************************************/
+
+/* > Externs ******************************************************************/
+extern LiquidCrystal_I2C lcd;
+
+/* > Structures ***************************************************************/
 
 /*******************************************************************************
  * struct: gamemodeTiming
@@ -22,6 +29,7 @@ struct gamemodeTiming
   bool isGameRunning = true;
 };
 
+/* > Functions ****************************************************************/
 void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametime);
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing);

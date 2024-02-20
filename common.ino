@@ -1,7 +1,5 @@
 #include "common.hpp"
 
-extern LiquidCrystal_I2C lcd;
-
 /* > Function convertMsTo3var
 *******************************************************************************/
 /**

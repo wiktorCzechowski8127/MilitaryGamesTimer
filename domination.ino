@@ -1,7 +1,4 @@
 #include "domination.hpp"
-#include "menu.hpp"
-
-extern LiquidCrystal_I2C lcd;
 
 int lastRightPointingMoment = 0;
 bool isRightButtonWasPushed = false;
@@ -174,8 +171,10 @@ void setScren()
 }
 
 
+
 void processDomination(const gamemodeDominationS* const gm)
 {
+  lcd.clear();
   bool isGameRunning = true;
   gamemodeTiming timing;
   initializeTiming(&timing, &gm->gameTime);
@@ -186,19 +185,9 @@ void processDomination(const gamemodeDominationS* const gm)
     Serial.println("TIMEDIFF: " + (String)(timing.currentTime - timing.lastCurrentTime)); //DEBUG
     timing.lastCurrentTime = timing.currentTime; //DEBUG
 
-
     isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
-    
   }
-  /*
-  while(true)
-  {
-    lcd.setCursor(4,0);
-    lcd.print("KONIEC");
-  }
-  */
 }
-
 
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm)
 {

@@ -1,6 +1,9 @@
 #ifndef BUTTONS_H
 #define BUTTONS_H
 
+/* > Include  *****************************************************************/
+
+/* > Defines ******************************************************************/
 #define COOLDOWN 20
 
 #define RIGHT_BUTTON 8
@@ -8,6 +11,9 @@
 #define UP_BUTTON 10
 #define DOWN_BUTTON 11
 
+/* > Externs ******************************************************************/
+
+/* > Functions ****************************************************************/
 bool buttonPushed(unsigned short pin)
 {   
     if (digitalRead(pin) == 0)

@@ -1,7 +1,5 @@
 #include "gamemodeCommon.hpp"
 
-extern LiquidCrystal_I2C lcd;
-
 void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametime)
 {
   memset(timing, 0, sizeof(timing));

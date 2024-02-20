@@ -1,10 +1,7 @@
-#include <LiquidCrystal_I2C.h>
 #include "lcd.hpp"
 
 void createProgressBarCharacters()
 {
-    extern LiquidCrystal_I2C lcd; // TODO - verify is that correct
-
     // Both sites characters
     byte filled[8] = {B00000,
                       B00000,
