@@ -6,6 +6,9 @@
 /* > Defines ******************************************************************/
 #define COOLDOWN 20
 
+#define RIGHT_TEAM_BUTTON 7
+#define LEFT_TEAM_BUTTON 6
+
 #define RIGHT_BUTTON 8
 #define LEFT_BUTTON 9
 #define UP_BUTTON 10

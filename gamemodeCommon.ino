@@ -28,7 +28,7 @@ bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
     timing->timeLeft = timing->endgame - timing->currentTime;
     lcd.setCursor(4,0);
     printTime(&timing->timeLeft, false);
-    Serial.println(timing->timeLeft); //DEBUG
+    //Serial.println(timing->timeLeft); //DEBUG
   }
   return isGameRunning;
 }

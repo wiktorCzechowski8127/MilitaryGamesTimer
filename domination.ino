@@ -178,13 +178,64 @@ void processDomination(const gamemodeDominationS* const gm)
   bool isGameRunning = true;
   gamemodeTiming timing;
   initializeTiming(&timing, &gm->gameTime);
-
+  
+  long int pointsInMs = 0;
+  unsigned long lastPushedButtonTimeStamp = 0;
+  bool isRightButtonPushed = 0;
+  bool isLeftButtonPushed = 0;
+  int gameStatus = 0;
   while(isGameRunning)
   {
     timing.currentTime = millis();
-    Serial.println("TIMEDIFF: " + (String)(timing.currentTime - timing.lastCurrentTime)); //DEBUG
+    //Serial.println("TIMEDIFF: " + (String)(timing.currentTime - timing.lastCurrentTime)); //DEBUG
     timing.lastCurrentTime = timing.currentTime; //DEBUG
 
+    //buttons is set as INPUT_PULLUP mode. If button is pushed digitalRead return 0.
+    if(!digitalRead(RIGHT_TEAM_BUTTON) && digitalRead(LEFT_TEAM_BUTTON))
+    {
+      Serial.println("RIGHT_TEAM");
+      if(isRightButtonPushed == true)
+      {
+        pointsInMs += (timing.currentTime - lastPushedButtonTimeStamp);
+        if (pointsInMs > (long int)gm->fullTakeOverTime)
+        {
+          pointsInMs = gm->fullTakeOverTime;
+        }
+      }
+      else
+      {
+        isRightButtonPushed = true;
+        isLeftButtonPushed = false;
+      }
+      lastPushedButtonTimeStamp = timing.currentTime;
+    }
+    else if(!digitalRead(LEFT_TEAM_BUTTON) && digitalRead(RIGHT_TEAM_BUTTON))
+    {
+      Serial.println("LEFT_TEAM");
+      if(isLeftButtonPushed == true)
+      {
+        pointsInMs -= (timing.currentTime - lastPushedButtonTimeStamp);
+        Serial.println("LPOINST: " + (String)pointsInMs);
+        if (pointsInMs < (long int)(gm->fullTakeOverTime * -1))
+        {
+          pointsInMs = (gm->fullTakeOverTime * -1);
+        }
+      }
+      else
+      {
+        isRightButtonPushed = false;
+        isLeftButtonPushed = true;
+      }
+      lastPushedButtonTimeStamp = timing.currentTime;
+    }
+    else
+    {
+      isRightButtonPushed = false;
+      isLeftButtonPushed = false;
+    }
+
+
+    Serial.println("POINST: " + (String)pointsInMs);
     isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
   }
 }

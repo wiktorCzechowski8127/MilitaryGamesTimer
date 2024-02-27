@@ -6,6 +6,7 @@
 #include "common.hpp"
 #include "gamemodeCommon.hpp"
 #include "lcd.hpp"
+#include "buttons.hpp"
 
 /* > Defines ******************************************************************/
 
