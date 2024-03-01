@@ -59,10 +59,123 @@ void createProgressBarCharacters()
                                B11111,};
 
     // Creating chars
-    lcd.createChar(FILLED, filled);
-    lcd.createChar(RIGHT_STRIP, rightStrip);
-    lcd.createChar(RIGHT_STRIP_FILLED, rightStripFilled);
-    lcd.createChar(LEFT_STRIP, leftStrip);
-    lcd.createChar(LEFT_STRIP_FILLED, leftStripFilled);
-    lcd.createChar(BOTTOM, bottomStrip);
+    lcd.createChar(CHAR_FILLED, filled);
+    lcd.createChar(CHAR_RIGHT_STRIP, rightStrip);
+    lcd.createChar(CHAR_RIGHT_STRIP_FILLED, rightStripFilled);
+    lcd.createChar(CHAR_LEFT_STRIP, leftStrip);
+    lcd.createChar(CHAR_LEFT_STRIP_FILLED, leftStripFilled);
+    lcd.createChar(CHAR_BOTTOM, bottomStrip);
+}
+
+void printtwoZonesProgresBar(const progressBarDataS* const data)
+{
+  char charToPrint = CHAR_BOTTOM;
+
+  // LEFT SITE
+  for(int i = TWO_ZONES_FIRST_CHAR; i <= TWO_ZONES_LAST_CHAR; i++)
+  {   
+    charToPrint = CHAR_BOTTOM;
+    if(i == TWO_ZONES_FIRST_CHAR)
+    {
+      if((data->filledSite == LEFT_TEAM) && (data->filledSquared >= (i + 1)))
+      {
+        charToPrint = CHAR_RIGHT_STRIP_FILLED;
+      }
+      else
+      {
+        charToPrint = CHAR_RIGHT_STRIP;
+      }
+    }
+    else if(i == (data->secondStageSquares - 1))
+    {
+      if((data->filledSite == LEFT_TEAM) && (data->filledSquared >= (i + 1)))
+      {
+        charToPrint = CHAR_LEFT_STRIP_FILLED;
+      }
+      else
+      {
+        charToPrint = CHAR_LEFT_STRIP;
+      }
+    }
+    else if(i == TWO_ZONES_LAST_CHAR)
+    {
+      if((data->filledSite == LEFT_TEAM) && (data->filledSquared >= (i + 1)))
+      {
+        charToPrint = CHAR_LEFT_STRIP_FILLED;
+      }
+      else
+      {
+        charToPrint = CHAR_LEFT_STRIP;
+      }
+    }
+    else
+    {
+      if((data->filledSite == LEFT_TEAM) && (data->filledSquared >= (i + 1)))
+      {
+        charToPrint = CHAR_FILLED;
+      }
+    }
+
+    lcd.setCursor((7 - i), 1);
+    lcd.write(byte(charToPrint));
+  }
+  
+  //RIGHT SITE
+  for(int i = TWO_ZONES_FIRST_CHAR; i <= TWO_ZONES_LAST_CHAR; i++)
+  {   
+    charToPrint = CHAR_BOTTOM;
+    if(i == TWO_ZONES_FIRST_CHAR)
+    {
+      if((data->filledSite == RIGHT_TEAM) && (data->filledSquared >= (i + 1)))
+      {
+        charToPrint = CHAR_LEFT_STRIP_FILLED;
+      }
+      else
+      {
+        charToPrint = CHAR_LEFT_STRIP;
+      }
+    }
+    else if(i == (data->secondStageSquares - 1))
+    {
+      if((data->filledSite == RIGHT_TEAM) && (data->filledSquared >= (i + 1)))
+      {
+        charToPrint = CHAR_RIGHT_STRIP_FILLED;
+      }
+      else
+      {
+        charToPrint = CHAR_RIGHT_STRIP;
+      }
+    }
+    else if(i == TWO_ZONES_LAST_CHAR)
+    {
+      if((data->filledSite == RIGHT_TEAM) && (data->filledSquared >= (i + 1)))
+      {
+        charToPrint = CHAR_RIGHT_STRIP_FILLED;
+      }
+      else
+      {
+        charToPrint = CHAR_RIGHT_STRIP;
+      }
+    }
+    else
+    {
+      if((data->filledSite == RIGHT_TEAM) && (data->filledSquared >= (i + 1)))
+      {
+        charToPrint = CHAR_FILLED;
+      }
+    }
+
+    lcd.setCursor((8 + i), 1);
+    lcd.write(byte(charToPrint));
+  }    
+}
+
+
+void printProgressBar(const progressBarDataS* const data)
+{
+  if(data->ammountOfStages == TWO_TEAMS_FOUR_ZONES)
+  {
+    printtwoZonesProgresBar(data);
+  }
+
 }

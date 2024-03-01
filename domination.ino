@@ -106,7 +106,7 @@ void dominationMain()
         lcd.setCursor(14, 0);
         lcd.print("T");
       }
-      int charToPrint = BOTTOM;
+      int charToPrint = CHAR_BOTTOM;
       int modifiedSquare = 0;
 
       for (int i = 0; i < filledRightSquares; i++)
@@ -118,19 +118,19 @@ void dominationMain()
             (modifiedSquare == FIRST_RIGHT_PLACE))
         {
           lcd.setCursor(modifiedSquare, 1);
-          charToPrint = LEFT_STRIP_FILLED;
+          charToPrint = CHAR_LEFT_STRIP_FILLED;
         }
         else if ((modifiedSquare == LAST_LCD_CHAR) ||
                  (modifiedSquare == righttakeOverSquares) ||
                  (modifiedSquare == FIRST_LEFT_PLACE))
         {
           lcd.setCursor(modifiedSquare, 1);
-          charToPrint = RIGHT_STRIP_FILLED;
+          charToPrint = CHAR_RIGHT_STRIP_FILLED;
         }
         else
         {
           lcd.setCursor(modifiedSquare, 1);
-          charToPrint = FILLED;
+          charToPrint = CHAR_FILLED;
         }
         lcd.write(byte(charToPrint));
       }
@@ -147,30 +147,72 @@ void setScren()
     takeOverToFullTakeOver = 0;
   }
   lcd.clear();
-  int charToPrint = BOTTOM;
+  int charToPrint = CHAR_BOTTOM;
   for (int i = 0; i <= 15; i++)
   {
     if ((i == FIRST_LCD_CHAR) || (i == lefttakeOverSquares) || (i == FIRST_RIGHT_PLACE))
     {
       lcd.setCursor(i, 1);
-      charToPrint = LEFT_STRIP;
+      charToPrint = CHAR_LEFT_STRIP;
     }
     else if ((i == LAST_LCD_CHAR) || (i == righttakeOverSquares) || (i == FIRST_LEFT_PLACE))
     {
       lcd.setCursor(i, 1);
-      charToPrint = RIGHT_STRIP;
+      charToPrint = CHAR_RIGHT_STRIP;
     }
     else
     {
       lcd.setCursor(i, 1);
-      charToPrint = BOTTOM;
+      charToPrint = CHAR_BOTTOM;
     }
     lcd.write(byte(charToPrint));
   }
   Serial.println("Screen is set");
 }
 
+void initializeProgressBarData(progressBarDataS* data, const gamemodeDominationS* const gm)
+{
+  data->ammountOfStages = TWO_TEAMS_FOUR_ZONES;
+  data->secondStageSquares =  round(8 * ((float)gm->takeOverTime / gm->fullTakeOverTime));
+  data->filledSite = 1;
+  data->timeOfOneTakeOverSquareFilled = (float)gm->takeOverTime / data->secondStageSquares;
+  data->timeOfOneFullTakeOverSquareFilled = (float)(gm->fullTakeOverTime - gm->takeOverTime) / (8 - data->secondStageSquares);
 
+  Serial.println(" ");
+  Serial.println("PROGRES BAR DATA:");
+  Serial.println("ammountOfStages: " + (String)data->ammountOfStages);
+  Serial.println("secondStageSquares: " + (String)data->secondStageSquares);
+  Serial.println("filledSquared: " + (String)data->filledSquared);
+  Serial.println("filledSite: " + (String)data->filledSite);
+  Serial.println("timeOfOneTakeOverSquareFilled: " + (String)data->timeOfOneTakeOverSquareFilled); 
+}
+
+void calculateFilledSquares(const gamemodeDominationS* const gm, progressBarDataS* progressBarData, const long int* const pointsInMs)
+{
+
+  long int absPointsInMs = abs(*pointsInMs);
+  if (*pointsInMs > 0)
+  {
+    progressBarData->filledSite = 1;
+  }
+  else
+  {
+    progressBarData->filledSite = 0;
+  }
+
+  if (absPointsInMs <= gm->takeOverTime)
+  {
+    progressBarData->filledSquared = absPointsInMs / progressBarData->timeOfOneTakeOverSquareFilled;
+  }
+  else
+  {
+    progressBarData->filledSquared = ((absPointsInMs -  gm->takeOverTime) / progressBarData->timeOfOneFullTakeOverSquareFilled);
+    progressBarData->filledSquared += progressBarData->secondStageSquares;
+  }
+    Serial.println("POINST: " + (String)*pointsInMs + " " + absPointsInMs);
+    Serial.println("FILLED SQUARES: " +(String)progressBarData->filledSquared);
+
+}
 
 void processDomination(const gamemodeDominationS* const gm)
 {
@@ -178,65 +220,71 @@ void processDomination(const gamemodeDominationS* const gm)
   bool isGameRunning = true;
   gamemodeTiming timing;
   initializeTiming(&timing, &gm->gameTime);
-  
-  long int pointsInMs = 0;
-  unsigned long lastPushedButtonTimeStamp = 0;
-  bool isRightButtonPushed = 0;
-  bool isLeftButtonPushed = 0;
-  int gameStatus = 0;
+
+  progressBarDataS progressBarData;
+  initializeProgressBarData(&progressBarData, gm);
+
+  pointsAndButtonsDataS pointsAndButtons;
+  memset(&pointsAndButtons, 0, sizeof(pointsAndButtons));
+
   while(isGameRunning)
   {
     timing.currentTime = millis();
     //Serial.println("TIMEDIFF: " + (String)(timing.currentTime - timing.lastCurrentTime)); //DEBUG
     timing.lastCurrentTime = timing.currentTime; //DEBUG
 
+    //Reading game buttons
     //buttons is set as INPUT_PULLUP mode. If button is pushed digitalRead return 0.
     if(!digitalRead(RIGHT_TEAM_BUTTON) && digitalRead(LEFT_TEAM_BUTTON))
     {
-      Serial.println("RIGHT_TEAM");
-      if(isRightButtonPushed == true)
+      if(pointsAndButtons.isRightButtonPushed == true)
       {
-        pointsInMs += (timing.currentTime - lastPushedButtonTimeStamp);
-        if (pointsInMs > (long int)gm->fullTakeOverTime)
+        pointsAndButtons.pointsInMs += (timing.currentTime - pointsAndButtons.lastPushedButtonTimeStamp);
+        if (pointsAndButtons.pointsInMs > gm->fullTakeOverTime)
         {
-          pointsInMs = gm->fullTakeOverTime;
+          pointsAndButtons.pointsInMs = gm->fullTakeOverTime;
         }
       }
       else
       {
-        isRightButtonPushed = true;
-        isLeftButtonPushed = false;
+        pointsAndButtons.isRightButtonPushed = true;
+        pointsAndButtons.isLeftButtonPushed = false;
       }
-      lastPushedButtonTimeStamp = timing.currentTime;
+      pointsAndButtons.lastPushedButtonTimeStamp = timing.currentTime;
     }
     else if(!digitalRead(LEFT_TEAM_BUTTON) && digitalRead(RIGHT_TEAM_BUTTON))
     {
-      Serial.println("LEFT_TEAM");
-      if(isLeftButtonPushed == true)
+      if(pointsAndButtons.isLeftButtonPushed == true)
       {
-        pointsInMs -= (timing.currentTime - lastPushedButtonTimeStamp);
-        Serial.println("LPOINST: " + (String)pointsInMs);
-        if (pointsInMs < (long int)(gm->fullTakeOverTime * -1))
+        pointsAndButtons.pointsInMs -= (timing.currentTime - pointsAndButtons.lastPushedButtonTimeStamp);
+        if (pointsAndButtons.pointsInMs < (gm->fullTakeOverTime * -1))
         {
-          pointsInMs = (gm->fullTakeOverTime * -1);
+          pointsAndButtons.pointsInMs = (gm->fullTakeOverTime * -1);
         }
       }
       else
       {
-        isRightButtonPushed = false;
-        isLeftButtonPushed = true;
+        pointsAndButtons.isRightButtonPushed = false;
+        pointsAndButtons.isLeftButtonPushed = true;
       }
-      lastPushedButtonTimeStamp = timing.currentTime;
+      pointsAndButtons.lastPushedButtonTimeStamp = timing.currentTime;
     }
     else
     {
-      isRightButtonPushed = false;
-      isLeftButtonPushed = false;
+      pointsAndButtons.isRightButtonPushed = false;
+      pointsAndButtons.isLeftButtonPushed = false;
     }
 
+    calculateFilledSquares(gm, &progressBarData, &pointsAndButtons.pointsInMs);
+    Serial.println("WINNING SITE:" + (String)progressBarData.filledSite);
+    printProgressBar(&progressBarData);
 
-    Serial.println("POINST: " + (String)pointsInMs);
     isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
+    // Reading steering buttons
+    if(!digitalRead(LEFT_BUTTON) && !digitalRead(RIGHT_BUTTON))
+    {
+      isGameRunning = false;
+    }
   }
 }
 

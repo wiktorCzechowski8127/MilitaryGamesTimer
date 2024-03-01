@@ -10,6 +10,7 @@
 #define SECONDS_IN_MS (unsigned long)1000
 
 /* > Typedefs *****************************************************************/
+typedef long int msTimeWithSingT;
 typedef unsigned long msTimeT;
 typedef unsigned short humanTimeT;
 

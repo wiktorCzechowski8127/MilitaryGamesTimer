@@ -25,10 +25,20 @@ extern LiquidCrystal_I2C lcd;
 *******************************************************************************/
 struct gamemodeDominationS
 {
-    msTimeT gameTime;
-    msTimeT fullTakeOverTime;
-    msTimeT takeOverTime;
-    bool enableSwitch;
+  msTimeT gameTime;
+  msTimeWithSingT fullTakeOverTime;
+  msTimeWithSingT takeOverTime;
+  bool enableSwitch;
+};
+
+struct pointsAndButtonsDataS
+{
+  long int pointsInMs;
+  unsigned long lastPushedButtonTimeStamp;
+  byte isRightButtonPushed:1;
+  byte isLeftButtonPushed:1;
+  byte isLeftTeamWinning:1;
+  byte padding:5;
 };
 
 /* > Functions ****************************************************************/
@@ -36,7 +46,7 @@ struct gamemodeDominationS
 void dominationMain();
 void setScren();
 
-
+void initializeProgressBarData(progressBarDataS* data);
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm);
 void processDomination(const gamemodeDominationS* const gm);
 
