@@ -10,6 +10,10 @@
 
 /* > Defines ******************************************************************/
 
+#define POINTING_NONE 0
+#define POINTING_LEFT_TEAM 1
+#define POINTING_RIGHT_TEAM 2
+
 /* > Typedefs *****************************************************************/
 
 /* > Externs ******************************************************************/
@@ -28,16 +32,21 @@ struct gamemodeDominationS
   msTimeT gameTime;
   msTimeWithSingT fullTakeOverTime;
   msTimeWithSingT takeOverTime;
+  msTimeT pointTime;
   bool enableSwitch;
 };
 
-struct pointsAndButtonsDataS
+struct dominationDataS
 {
-  long int pointsInMs;
-  unsigned long lastPushedButtonTimeStamp;
+  msTimeWithSingT pointsInMs;
+  msTimeT lastPushedButtonTimeStamp;
+  msTimeT addPointTimeStamp;
+  unsigned int leftTeamWinningPoints;
+  unsigned int rightTeamWinningPoints;  
   byte isRightButtonPushed:1;
   byte isLeftButtonPushed:1;
   byte isLeftTeamWinning:1;
+  byte pointingTeam:2; // 0 - None, 1 - left, 2 - right
   byte padding:5;
 };
 
@@ -45,6 +54,9 @@ struct pointsAndButtonsDataS
 
 void dominationMain();
 void setScren();
+
+void printWinningPoints(const unsigned int* const leftTeamWinningPoints, const unsigned int* const rightTeamWinningPoints, bool printOnLowerPart);
+void printSummary(const msTimeT* const gameTime, const msTimeT* const runningTime ,const unsigned int* const leftTeamWinningPoints, const unsigned int* const rightTeamWinningPoints);
 
 void initializeProgressBarData(progressBarDataS* data);
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm);

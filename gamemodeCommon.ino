@@ -22,6 +22,7 @@ bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
   if(timing->currentTime > timing->endgame)
   {
     isGameRunning = false;
+    timing->timeLeft = 0;
   }
   else
   {

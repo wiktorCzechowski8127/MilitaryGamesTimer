@@ -170,6 +170,58 @@ void setScren()
   Serial.println("Screen is set");
 }
 
+void printWinningPoints(const unsigned int* const leftTeamWinningPoints, const unsigned int* const rightTeamWinningPoints, bool printOnLowerPart)
+{
+  // Printing left team points
+  lcd.setCursor(FIRST_LCD_CHAR, printOnLowerPart);
+  lcd.print(*leftTeamWinningPoints);
+  // Calculating lcd position
+  uint8_t rightLcdPos = LAST_LCD_CHAR;
+  if(*rightTeamWinningPoints > 9)
+  {
+    rightLcdPos -= 1;
+  }
+  else if(*rightTeamWinningPoints > 99)
+  {
+    rightLcdPos -= 2;
+  }
+  else if(*rightTeamWinningPoints > 999)
+  {
+    rightLcdPos -= 3;
+  }
+  // Printing right team points
+  lcd.setCursor(rightLcdPos, printOnLowerPart);
+  lcd.print(*rightTeamWinningPoints);
+}
+
+void printSummary(const msTimeT* const gameTime, 
+                  const msTimeT* const runningTime,
+                  const unsigned int* const leftTeamWinningPoints,
+                  const unsigned int* const rightTeamWinningPoints)
+{
+  // Printing passed Time
+  msTimeT passedTime = *gameTime - *runningTime;
+  lcd.clear();
+  lcd.setCursor(FIRST_LCD_CHAR, 0);
+  lcd.print("CZAS: ");
+  printTime(&passedTime, false);
+
+  printWinningPoints(leftTeamWinningPoints, rightTeamWinningPoints, true);
+  
+  // Printing winner signs
+  if(*leftTeamWinningPoints >= *rightTeamWinningPoints)
+  {
+    lcd.setCursor(FIRST_LEFT_PLACE, 1);
+    lcd.write(byte(127));
+  }
+  if(*rightTeamWinningPoints >= *leftTeamWinningPoints)
+  {
+    lcd.setCursor(FIRST_RIGHT_PLACE, 1);
+    lcd.write(byte(126));
+  }
+
+}
+
 void initializeProgressBarData(progressBarDataS* data, const gamemodeDominationS* const gm)
 {
   data->ammountOfStages = TWO_TEAMS_FOUR_ZONES;
@@ -209,8 +261,8 @@ void calculateFilledSquares(const gamemodeDominationS* const gm, progressBarData
     progressBarData->filledSquared = ((absPointsInMs -  gm->takeOverTime) / progressBarData->timeOfOneFullTakeOverSquareFilled);
     progressBarData->filledSquared += progressBarData->secondStageSquares;
   }
-    Serial.println("POINST: " + (String)*pointsInMs + " " + absPointsInMs);
-    Serial.println("FILLED SQUARES: " +(String)progressBarData->filledSquared);
+    //Serial.println("POINST: " + (String)*pointsInMs + " " + absPointsInMs);
+    //Serial.println("FILLED SQUARES: " +(String)progressBarData->filledSquared);
 
 }
 
@@ -224,8 +276,8 @@ void processDomination(const gamemodeDominationS* const gm)
   progressBarDataS progressBarData;
   initializeProgressBarData(&progressBarData, gm);
 
-  pointsAndButtonsDataS pointsAndButtons;
-  memset(&pointsAndButtons, 0, sizeof(pointsAndButtons));
+  dominationDataS data;
+  memset(&data, 0, sizeof(data));
 
   while(isGameRunning)
   {
@@ -235,48 +287,125 @@ void processDomination(const gamemodeDominationS* const gm)
 
     //Reading game buttons
     //buttons is set as INPUT_PULLUP mode. If button is pushed digitalRead return 0.
+    // Right team
     if(!digitalRead(RIGHT_TEAM_BUTTON) && digitalRead(LEFT_TEAM_BUTTON))
     {
-      if(pointsAndButtons.isRightButtonPushed == true)
+      lcd.setCursor(12, 0);
+      lcd.write(byte(126));
+      // Button pushed
+      if(data.isRightButtonPushed == true)
       {
-        pointsAndButtons.pointsInMs += (timing.currentTime - pointsAndButtons.lastPushedButtonTimeStamp);
-        if (pointsAndButtons.pointsInMs > gm->fullTakeOverTime)
+        // Calculating Points
+        data.pointsInMs += (timing.currentTime - data.lastPushedButtonTimeStamp);
+        if (data.pointsInMs > gm->fullTakeOverTime)
         {
-          pointsAndButtons.pointsInMs = gm->fullTakeOverTime;
+          data.pointsInMs = gm->fullTakeOverTime;
+        }
+        // Setting pointing site
+        if (data.pointingTeam != POINTING_RIGHT_TEAM)
+        {
+          if (data.pointsInMs > gm->takeOverTime)
+          {
+            data.pointingTeam = POINTING_RIGHT_TEAM;
+            data.addPointTimeStamp = timing.currentTime + gm->pointTime;
+
+                // DEBUG
+            Serial.println("");
+            Serial.println("BUTTON");
+            Serial.print("pointingTeam: " + (String)data.pointingTeam);
+            Serial.print(" currentTime: " + (String)timing.currentTime); 
+            Serial.println(" addPointTimeStamp: " + (String)data.addPointTimeStamp);   
+          }
+          else
+          {
+            data.pointingTeam = POINTING_NONE;
+          }
         }
       }
       else
       {
-        pointsAndButtons.isRightButtonPushed = true;
-        pointsAndButtons.isLeftButtonPushed = false;
+        data.isRightButtonPushed = true;
+        data.isLeftButtonPushed = false;
       }
-      pointsAndButtons.lastPushedButtonTimeStamp = timing.currentTime;
+      data.lastPushedButtonTimeStamp = timing.currentTime;
     }
+    // LEFT TEAM
     else if(!digitalRead(LEFT_TEAM_BUTTON) && digitalRead(RIGHT_TEAM_BUTTON))
     {
-      if(pointsAndButtons.isLeftButtonPushed == true)
+      lcd.setCursor(3, 0);
+      lcd.write(byte(127));
+      if(data.isLeftButtonPushed == true)
       {
-        pointsAndButtons.pointsInMs -= (timing.currentTime - pointsAndButtons.lastPushedButtonTimeStamp);
-        if (pointsAndButtons.pointsInMs < (gm->fullTakeOverTime * -1))
+        data.pointsInMs -= (timing.currentTime - data.lastPushedButtonTimeStamp);
+        if (data.pointingTeam != POINTING_LEFT_TEAM)
         {
-          pointsAndButtons.pointsInMs = (gm->fullTakeOverTime * -1);
+          if (data.pointsInMs < -(gm->takeOverTime))
+          {
+            data.pointingTeam = POINTING_LEFT_TEAM;
+            data.addPointTimeStamp = timing.currentTime + gm->pointTime;
+
+                  // DEBUG
+              Serial.println("");
+              Serial.println("BUTTON");
+              Serial.print("pointingTeam: " + (String)data.pointingTeam);
+              Serial.print(" currentTime: " + (String)timing.currentTime); 
+              Serial.println(" addPointTimeStamp: " + (String)data.addPointTimeStamp);   
+          }
+          else
+          {
+            data.pointingTeam = POINTING_NONE;
+          }
+        }
+        if (data.pointsInMs < (gm->fullTakeOverTime * -1))
+        {
+          data.pointsInMs = (gm->fullTakeOverTime * -1);
         }
       }
       else
       {
-        pointsAndButtons.isRightButtonPushed = false;
-        pointsAndButtons.isLeftButtonPushed = true;
+        data.isRightButtonPushed = false;
+        data.isLeftButtonPushed = true;
       }
-      pointsAndButtons.lastPushedButtonTimeStamp = timing.currentTime;
+      data.lastPushedButtonTimeStamp = timing.currentTime;
     }
     else
     {
-      pointsAndButtons.isRightButtonPushed = false;
-      pointsAndButtons.isLeftButtonPushed = false;
+      lcd.setCursor(3, 0);
+      lcd.print(" ");
+      lcd.setCursor(12, 0);
+      lcd.print(" ");
+      data.isRightButtonPushed = false;
+      data.isLeftButtonPushed = false;
     }
 
-    calculateFilledSquares(gm, &progressBarData, &pointsAndButtons.pointsInMs);
-    Serial.println("WINNING SITE:" + (String)progressBarData.filledSite);
+
+    // calculating winning points
+    if(data.pointingTeam != POINTING_NONE)
+    {
+      if(timing.currentTime > data.addPointTimeStamp)
+      {
+        if(data.pointingTeam == POINTING_LEFT_TEAM)
+        {
+          data.leftTeamWinningPoints += 1;
+        }
+        else
+        {
+          data.rightTeamWinningPoints += 1;
+        }
+        data.addPointTimeStamp += gm->pointTime;
+
+            // DEBUG
+        Serial.println("");
+        Serial.println("AUTO");
+        Serial.print("pointingTeam: " + (String)data.pointingTeam);
+        Serial.print(" currentTime: " + (String)timing.currentTime); 
+        Serial.println(" addPointTimeStamp: " + (String)data.addPointTimeStamp);   
+      }
+    } 
+
+    printWinningPoints(&data.leftTeamWinningPoints, &data.rightTeamWinningPoints, false);
+    calculateFilledSquares(gm, &progressBarData, &data.pointsInMs);
+    //Serial.println("WINNING SITE:" + (String)progressBarData.filledSite); // DEBUG
     printProgressBar(&progressBarData);
 
     isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
@@ -286,6 +415,18 @@ void processDomination(const gamemodeDominationS* const gm)
       isGameRunning = false;
     }
   }
+
+  // Printing summary
+  printSummary(&gm->gameTime, &timing.timeLeft, &data.leftTeamWinningPoints, &data.rightTeamWinningPoints);
+  delay(2000);
+  while(true)
+  {
+    if(!digitalRead(LEFT_BUTTON) && !digitalRead(RIGHT_BUTTON))
+    {
+      break;
+    }
+  }
+  delay(500);
 }
 
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm)

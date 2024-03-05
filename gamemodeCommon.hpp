@@ -23,9 +23,9 @@ extern LiquidCrystal_I2C lcd;
 struct gamemodeTiming
 {   
   msTimeT endgame;
-  unsigned long timeLeft;
-  unsigned long currentTime;
-  unsigned long lastCurrentTime; //DEBUG
+  msTimeT timeLeft;
+  msTimeT currentTime;
+  msTimeT lastCurrentTime; //DEBUG
   bool isGameRunning = true;
 };
 

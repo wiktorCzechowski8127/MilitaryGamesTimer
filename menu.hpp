@@ -14,7 +14,7 @@
 #define AMMOUNT_OF_LCD_CHARS 14
 
 #define STAGE_1_1_OPTIONS 6
-#define STAGE_1_2_OPTIONS 5
+#define STAGE_1_2_OPTIONS 6
 
 #define BOMB_GAMEMODE 0
 #define DOMINATION_GAMEMODE 1
@@ -90,6 +90,7 @@ struct menuStringsS
     char stringDomination[STAGE_1_2_OPTIONS][AMMOUNT_OF_LCD_CHARS] = {"CZAS GRY",
                                                                       "P. PRZEJECIE",
                                                                       "PRZEJECIE",
+                                                                      "PUNKT CO",
                                                                       "PRZELACZNIK",
                                                                       "START"};
 };

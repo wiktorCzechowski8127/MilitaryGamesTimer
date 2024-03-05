@@ -391,9 +391,10 @@ void setDefaultGamemodeBomb(gamemodeBombS* gm)
 *******************************************************************************/
 void setDefaultGamemodeDomination(gamemodeDominationS* gm)
 {
-    gm->gameTime = (0 * HOURS_IN_MS + 2 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
+    gm->gameTime = (0 * HOURS_IN_MS + 60 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
     gm->fullTakeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 8 * SECONDS_IN_MS);
     gm->takeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 4 * SECONDS_IN_MS);
+    gm->pointTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 3 * SECONDS_IN_MS);
     gm->enableSwitch = false;
 }
 
@@ -484,7 +485,11 @@ void printDominationOptions(const menuBaseS* const menuBase)
             printTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true);
             break;
         case 3:
+            printTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true);
+            break;
+        case 4:
             printBoolOption(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
+            break;
         default:
             break;
         }
@@ -665,9 +670,12 @@ void validateStage1_2Position(menuBaseS* menuBase)
             setTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true);
             break;
         case 3:
-            setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
+            setTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true);
             break;
         case 4:
+            setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
+            break;
+        case 5:
             startGame(menuBase);
         default:
             break;
