@@ -13,6 +13,8 @@
 #define CHAR_LEFT_STRIP 3
 #define CHAR_LEFT_STRIP_FILLED 4
 #define CHAR_BOTTOM 5
+#define CHAR_TWO_STRIPS 6
+#define CHAR_TWO_STRIPS_FILLED 7
 
 // LCD sizes
 #define TWO_ZONES_FIRST_CHAR 0
@@ -26,9 +28,8 @@
 
 #define AMMOUNT_OF_SQUARES_PER_TEAM 8
 
-#define NO_TEAMS 0
-#define TWO_TEAMS_TWO_ZONES 1
-#define TWO_TEAMS_FOUR_ZONES 2
+#define BAR_TYPE_NO_TEAMS 0
+#define BAR_TYPE_TWO_TEAMS 1
 
 #define LEFT_TEAM 0
 #define RIGHT_TEAM 1

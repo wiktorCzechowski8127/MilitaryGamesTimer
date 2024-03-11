@@ -35,6 +35,8 @@
 
 #define BOOL_OPTION_CURSOR_POS 4
 
+#define FREEZE_TIME 2000
+
 /* > Typedefs *****************************************************************/
 
 /* > Externs ******************************************************************/
@@ -103,8 +105,9 @@ struct menuStringsS
 *******************************************************************************/
 struct menuNavigationS
 {
-    unsigned short menuStage = 0;
+    unsigned short menuStage = 0; //TODO delete this
     unsigned short menuPosition[MENU_STAGES];
+    bool freezeMenu;
 };
 
 /*******************************************************************************
@@ -122,8 +125,9 @@ struct menuBaseS
 };
 
 /* > Functions ****************************************************************/
+void startGame(menuBaseS* menuBase);
 void validateTime(humanTimeT* time);
-void setTime(msTimeT* timeToModify, bool minutesOnly);
+void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT* timeLimit);
 void setBoolean(bool* option);
 
 void convert3varToMs(humanTimeT hours,

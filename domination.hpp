@@ -47,7 +47,8 @@ struct dominationDataS
   byte isLeftButtonPushed:1;
   byte isLeftTeamWinning:1;
   byte pointingTeam:2; // 0 - None, 1 - left, 2 - right
-  byte padding:5;
+  byte swithStatus:1;
+  byte padding:4;
 };
 
 /* > Functions ****************************************************************/
@@ -58,7 +59,10 @@ void setScren();
 void printWinningPoints(const unsigned int* const leftTeamWinningPoints, const unsigned int* const rightTeamWinningPoints, bool printOnLowerPart);
 void printSummary(const msTimeT* const gameTime, const msTimeT* const runningTime ,const unsigned int* const leftTeamWinningPoints, const unsigned int* const rightTeamWinningPoints);
 
+void clearButtonsStatus(dominationDataS* data);
+
 void initializeProgressBarData(progressBarDataS* data);
+void calculateFilledSquares(const gamemodeDominationS* const gm, progressBarDataS* progressBarData, const long int* const pointsInMs);
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm);
 void processDomination(const gamemodeDominationS* const gm);
 

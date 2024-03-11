@@ -7,6 +7,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);  // set the LCD address to 0x20 for a 16 cha
 
 void setup() {
   //butons
+  pinMode(SWITCH, INPUT_PULLUP);
   pinMode(LEFT_TEAM_BUTTON, INPUT_PULLUP);
   pinMode(RIGHT_TEAM_BUTTON, INPUT_PULLUP);
   pinMode(8, INPUT_PULLUP);

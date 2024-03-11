@@ -88,6 +88,7 @@ void startGame(menuBaseS* menuBase)
                     lcd.print("WYSTARTOWANO");
                     processDomination(&menuBase->gamemodeData.gamemodeDomination);
                     menuBase->navigation.menuStage = 0;
+                    menuBase->navigation.freezeMenu = true;
                     break;
                 }
                 else
@@ -136,142 +137,151 @@ void validateTime(humanTimeT* time)
  * 
  * @param[in] timeInMs     Pointer to time in Ms to set.
  * @param[in] minutesOnly  Information about using only minutes and seconds.
+ * @param[in] timeLimit    timeToModify limit
  * @return void
  * 
 *******************************************************************************/
-void setTime(msTimeT* timeToModify, bool minutesOnly)
+void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT timeLimit = UINT32_MAX)
 {
-    // Initializing variables
-    char valueToPrint[15] = "";
-    humanTimeT hours;
-    humanTimeT minutes;
-    humanTimeT seconds;
-    convertMsTo3var(timeToModify, &hours, &minutes, &seconds);
+  // Initializing variables
+  char valueToPrint[15] = "";
+  humanTimeT hours;
+  humanTimeT minutes;
+  humanTimeT seconds;
+  convertMsTo3var(timeToModify, &hours, &minutes, &seconds);
 
-    unsigned short cursorPosition = 0;
-    unsigned short monthOnlyPositionTreshold = 0;
+  unsigned short cursorPosition = 0;
+  unsigned short monthOnlyPositionTreshold = 0;
 
-    bool isButtonPushed = false;
-    bool isUpOrDownButtonPused = false;
-    short operand = 1;
+  bool isButtonPushed = false;
+  bool isUpOrDownButtonPused = false;
+  short operand = 1;
+
+  // Printing status on lcd
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("USTAW CZAS");
+  if (minutesOnly)
+  {
+    cursorPosition = 3;
+    monthOnlyPositionTreshold = 3;
+    snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d", minutes, seconds);
+  }
+  else
+  {
+    cursorPosition = 0;
+    monthOnlyPositionTreshold = 0;
+    snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d:%02d", hours, minutes, seconds);       
+  }
+  lcd.setCursor(0,1);
+  lcd.print(valueToPrint);
+  lcd.setCursor(cursorPosition - monthOnlyPositionTreshold,1);
+  lcd.blink();
+
+  // Main function loop
+  while(true)
+  {
+    isUpOrDownButtonPused = false;
+    isButtonPushed = false;
+
+    // Reading button status
+    if(buttonPushed(UP_BUTTON))
+    {
+      Serial.println("up");
+      isButtonPushed = true;
+      isUpOrDownButtonPused = true;
+      operand = 1;
+    }
+    if(buttonPushed(DOWN_BUTTON))
+    {
+      isButtonPushed = true;
+      isUpOrDownButtonPused = true;
+      operand = -1;
+    }
+    if(buttonPushed(RIGHT_BUTTON))
+    {
+      isButtonPushed = true;
+      cursorPosition++;
+      if(cursorPosition == 2 || cursorPosition == 5)
+      {
+        cursorPosition++;
+      }
+    }
+    if(buttonPushed(LEFT_BUTTON))
+    {
+      isButtonPushed = true;
+      cursorPosition--;
+      if(cursorPosition == 2 || cursorPosition == 5)
+      {
+        cursorPosition--;               
+      }
+    }
+
+    // Proceding up/down buttons
+    if(isUpOrDownButtonPused)
+    {
+      switch (cursorPosition)
+      {
+      case HOURS_TENS:
+        hours += (TEENS * operand);
+        validateTime(&hours);
+        break;
+      case HOURS_UNITS:
+        hours += (UNITS * operand);
+        validateTime(&hours);
+        break;
+      case MINUTES_TENS:
+        minutes += (TEENS * operand);
+        validateTime(&minutes);
+        break;
+      case MINUTES_UNITS:
+        minutes += (UNITS * operand);
+        validateTime(&minutes);
+        break;
+      case SECONDS_TENS:
+        seconds += (TEENS * operand);
+        validateTime(&seconds);
+        break;
+      case SECONDS_UNTIS:
+        seconds += (UNITS * operand);
+        validateTime(&seconds);
+        break;
+      default:
+        break;
+      }
+    }
 
     // Printing status on lcd
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("USTAW CZAS");
-    if (minutesOnly)
-    {
-        cursorPosition = 3;
-        monthOnlyPositionTreshold = 3;
+    if(isButtonPushed)
+    {   
+      if (cursorPosition >= TIME_CHARACTERS || cursorPosition < monthOnlyPositionTreshold)
+      {
+        convert3varToMs(hours, minutes, seconds, timeToModify);
+        lcd.noBlink();
+        break;
+      }
+
+      convert3varToMs(hours, minutes, seconds, timeToModify);
+      if(*timeToModify > timeLimit)
+      {
+        *timeToModify = timeLimit;
+        convertMsTo3var(timeToModify, &hours, &minutes, &seconds);
+      }
+
+      if (minutesOnly)
+      {
         snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d", minutes, seconds);
-    }
-    else
-    {
-        cursorPosition = 0;
-        monthOnlyPositionTreshold = 0;
+      }
+      else
+      {
         snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d:%02d", hours, minutes, seconds);       
+      }
+      lcd.setCursor(0,1);
+      lcd.print(valueToPrint);
+      lcd.setCursor(cursorPosition - monthOnlyPositionTreshold,1);
+      lcd.blink();
     }
-    lcd.setCursor(0,1);
-    lcd.print(valueToPrint);
-    lcd.setCursor(cursorPosition - monthOnlyPositionTreshold,1);
-    lcd.blink();
-
-    // Main function loop
-    while(true)
-    {
-        isUpOrDownButtonPused = false;
-        isButtonPushed = false;
-
-        // Reading button status
-        if(buttonPushed(UP_BUTTON))
-        {
-            Serial.println("up");
-            isButtonPushed = true;
-            isUpOrDownButtonPused = true;
-            operand = 1;
-        }
-        if(buttonPushed(DOWN_BUTTON))
-        {
-            isButtonPushed = true;
-            isUpOrDownButtonPused = true;
-            operand = -1;
-        }
-        if(buttonPushed(RIGHT_BUTTON))
-        {
-            isButtonPushed = true;
-            cursorPosition++;
-            if(cursorPosition == 2 || cursorPosition == 5)
-            {
-                cursorPosition++;
-            }
-        }
-        if(buttonPushed(LEFT_BUTTON))
-        {
-            isButtonPushed = true;
-            cursorPosition--;
-            if(cursorPosition == 2 || cursorPosition == 5)
-            {
-                cursorPosition--;               
-            }
-        }
-
-        // Proceding up/down buttons
-        if(isUpOrDownButtonPused)
-        {
-            switch (cursorPosition)
-            {
-            case HOURS_TENS:
-                hours += (TEENS * operand);
-                validateTime(&hours);
-                break;
-            case HOURS_UNITS:
-                hours += (UNITS * operand);
-                validateTime(&hours);
-                break;
-            case MINUTES_TENS:
-                minutes += (TEENS * operand);
-                validateTime(&minutes);
-                break;
-            case MINUTES_UNITS:
-                minutes += (UNITS * operand);
-                validateTime(&minutes);
-                break;
-            case SECONDS_TENS:
-                seconds += (TEENS * operand);
-                validateTime(&seconds);
-                break;
-            case SECONDS_UNTIS:
-                seconds += (UNITS * operand);
-                validateTime(&seconds);
-                break;
-            default:
-                break;
-            }
-        }
-
-        // Printing status on lcd
-        if(isButtonPushed)
-        {   
-            if (cursorPosition >= TIME_CHARACTERS || cursorPosition < monthOnlyPositionTreshold)
-            {
-                convert3varToMs(hours, minutes, seconds, timeToModify);
-                lcd.noBlink();
-                break;
-            }
-            if (minutesOnly)
-            {
-                snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d", minutes, seconds);
-            }
-            else
-            {
-                snprintf(valueToPrint, sizeof valueToPrint, "%02d:%02d:%02d", hours, minutes, seconds);       
-            }
-            lcd.setCursor(0,1);
-            lcd.print(valueToPrint);
-            lcd.setCursor(cursorPosition - monthOnlyPositionTreshold,1);
-            lcd.blink();
-        }
-    }
+  }
 }
 
 /* > Function setBoolean
@@ -392,9 +402,9 @@ void setDefaultGamemodeBomb(gamemodeBombS* gm)
 void setDefaultGamemodeDomination(gamemodeDominationS* gm)
 {
     gm->gameTime = (0 * HOURS_IN_MS + 60 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
-    gm->fullTakeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 8 * SECONDS_IN_MS);
-    gm->takeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 4 * SECONDS_IN_MS);
-    gm->pointTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 3 * SECONDS_IN_MS);
+    gm->fullTakeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
+    gm->takeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 2 * SECONDS_IN_MS);
+    gm->pointTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);
     gm->enableSwitch = false;
 }
 
@@ -415,6 +425,7 @@ void initializeMenu(menuBaseS* menuBase)
 
     setDefaultGamemodeBomb(&menuBase->gamemodeData.gamemodeBomb);
     setDefaultGamemodeDomination(&menuBase->gamemodeData.gamemodeDomination);
+    menuBase->navigation.freezeMenu = 0;
     printMenu(menuBase);
 }
 
@@ -661,16 +672,33 @@ void validateStage1_2Position(menuBaseS* menuBase)
         switch (menuBase->navigation.menuPosition[1])
         {
         case 0:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.gameTime, false);
+            setTime(&menuBase->gamemodeData.gamemodeDomination.gameTime, false);   
+
+            if(menuBase->gamemodeData.gamemodeDomination.pointTime >
+               menuBase->gamemodeData.gamemodeDomination.gameTime)
+            {
+              menuBase->gamemodeData.gamemodeDomination.pointTime = 
+                menuBase->gamemodeData.gamemodeDomination.gameTime;
+            }     
             break;
         case 1:
             setTime(&menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime, true);
+
+            (menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 1 : menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime;
+            
+            
+            if(menuBase->gamemodeData.gamemodeDomination.takeOverTime >
+               menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime)
+            {
+              menuBase->gamemodeData.gamemodeDomination.takeOverTime = 
+                menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime;
+            }
             break;
         case 2:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true);
+            setTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true, menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime);
             break;
         case 3:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true);
+            setTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true, menuBase->gamemodeData.gamemodeDomination.gameTime);
             break;
         case 4:
             setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
@@ -791,6 +819,12 @@ void processMenu()
         {
             validateMenuPositionWrapper(&menuBase);
             printMenu(&menuBase);
+        }
+        if(menuBase.navigation.freezeMenu)
+        {
+          Serial.println("FREEZE");
+          delay(FREEZE_TIME);
+          menuBase.navigation.freezeMenu = false;
         }
     }
 }
