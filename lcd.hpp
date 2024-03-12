@@ -43,7 +43,7 @@ extern LiquidCrystal_I2C lcd; // TODO - verify is that correct
 struct progressBarDataS
 {
   unsigned int ammountOfStages: 2;
-  unsigned int secondStageSquares: 4;
+  unsigned int takeOverStageSquares: 4;
   unsigned int filledSquared: 4;
   unsigned int filledSite: 1;
   unsigned int padding: 5;
