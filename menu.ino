@@ -672,8 +672,11 @@ void validateStage1_2Position(menuBaseS* menuBase)
         switch (menuBase->navigation.menuPosition[1])
         {
         case 0:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.gameTime, false);   
+            setTime(&menuBase->gamemodeData.gamemodeDomination.gameTime, false);
+            // Zero case -> 1 sec
+            (menuBase->gamemodeData.gamemodeDomination.pointTime == 0) ? menuBase->gamemodeData.gamemodeDomination.pointTime = SECONDS_IN_MS : menuBase->gamemodeData.gamemodeDomination.pointTime;
 
+            // Pointing time > gameTime
             if(menuBase->gamemodeData.gamemodeDomination.pointTime >
                menuBase->gamemodeData.gamemodeDomination.gameTime)
             {
@@ -681,12 +684,12 @@ void validateStage1_2Position(menuBaseS* menuBase)
                 menuBase->gamemodeData.gamemodeDomination.gameTime;
             }     
             break;
-        case 1:
+        case 1: // fullTakeOverTime
             setTime(&menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime, true);
-
+            // Zero case -> 1ms
             (menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 1 : menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime;
             
-            
+            // takeOverTime > fullTakeOverTime
             if(menuBase->gamemodeData.gamemodeDomination.takeOverTime >
                menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime)
             {
@@ -694,11 +697,15 @@ void validateStage1_2Position(menuBaseS* menuBase)
                 menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime;
             }
             break;
-        case 2:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true, menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime);
+        case 2: // takeOverTime
+            setTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true, menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime); // case with limit
+            // Zero case -> 1ms
+            (menuBase->gamemodeData.gamemodeDomination.takeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 1 : menuBase->gamemodeData.gamemodeDomination.takeOverTime;
             break;
-        case 3:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true, menuBase->gamemodeData.gamemodeDomination.gameTime);
+        case 3: // pointTime
+            setTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true, menuBase->gamemodeData.gamemodeDomination.gameTime); // case with limit
+            // Zero case -> 1sec   
+            (menuBase->gamemodeData.gamemodeDomination.pointTime == 0) ? menuBase->gamemodeData.gamemodeDomination.pointTime = SECONDS_IN_MS : menuBase->gamemodeData.gamemodeDomination.pointTime;
             break;
         case 4:
             setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);

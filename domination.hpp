@@ -13,6 +13,7 @@
 #define POINTING_NONE 0
 #define POINTING_LEFT_TEAM 1
 #define POINTING_RIGHT_TEAM 2
+#define WINNING_POINTS_OUT_OF_RANGE "9+9"
 
 /* > Typedefs *****************************************************************/
 

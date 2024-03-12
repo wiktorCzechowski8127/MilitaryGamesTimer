@@ -35,7 +35,7 @@
 
 #define BOOL_OPTION_CURSOR_POS 4
 
-#define FREEZE_TIME 2000
+#define FREEZE_TIME 1000
 
 /* > Typedefs *****************************************************************/
 
