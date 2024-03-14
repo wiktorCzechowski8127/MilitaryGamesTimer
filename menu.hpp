@@ -14,7 +14,7 @@
 #define AMMOUNT_OF_LCD_CHARS 14
 
 #define STAGE_1_1_OPTIONS 6
-#define STAGE_1_2_OPTIONS 6
+#define STAGE_1_2_OPTIONS 8
 
 #define BOMB_GAMEMODE 0
 #define DOMINATION_GAMEMODE 1
@@ -34,6 +34,7 @@
 #define UNITS 1
 
 #define BOOL_OPTION_CURSOR_POS 4
+#define UINT_OPTION_CURSOR_POS 2
 
 #define FREEZE_TIME 1000
 
@@ -93,7 +94,9 @@ struct menuStringsS
                                                                       "P. PRZEJECIE",
                                                                       "PRZEJECIE",
                                                                       "PUNKT CO",
+                                                                      "LIMIT PUNKOW",
                                                                       "PRZELACZNIK",
+                                                                      "SYRENA",
                                                                       "START"};
 };
 
@@ -127,8 +130,9 @@ struct menuBaseS
 /* > Functions ****************************************************************/
 void startGame(menuBaseS* menuBase);
 void validateTime(humanTimeT* time);
-void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT* timeLimit);
+void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT timeLimit = UINT32_MAX);
 void setBoolean(bool* option);
+void setValue(int* valueToModify, int valueLimit);
 
 void convert3varToMs(humanTimeT hours,
                      humanTimeT minutes,
@@ -138,6 +142,7 @@ void convert3varToMs(humanTimeT hours,
 
 
 void printBoolOption(const bool* const option);
+void printValueOption(const int* const value, bool spaceFill);
 
 void printBombOptions(const menuBaseS* const menuBase);
 void printDominationOptions(const menuBaseS* const menuBase);

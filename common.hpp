@@ -9,6 +9,9 @@
 #define MINUTES_IN_MS 60000
 #define SECONDS_IN_MS (unsigned long)1000
 
+#define BEEP_TIME 10
+#define ALARM_SPEAKER_MAX_TIME 2 * MINUTES_IN_MS
+
 /* > Typedefs *****************************************************************/
 typedef long int msTimeWithSingT;
 typedef unsigned long msTimeT;
@@ -26,5 +29,7 @@ void convertMsTo3var(const msTimeT* const timeInMs,
                      humanTimeT* seconds);
 
 void printTime(const msTimeT* const timeInMs, bool minutesOnly);
+
+void beep();
 
 #endif

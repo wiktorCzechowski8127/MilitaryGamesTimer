@@ -4,9 +4,18 @@
 #include "menu.hpp"
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);  // set the LCD address to 0x20 for a 16 chars and 2 line display
+#define RELAY_OFF false
+#define RELAY_ON !RELAY_OFF
 
 void setup() {
   //butons
+  pinMode(RELAY, OUTPUT);
+  digitalWrite(RELAY, RELAY_OFF);
+
+  pinMode(BUZZER, OUTPUT);
+  digitalWrite(BUZZER, false);
+
+  pinMode(LEFT_TEAM_BUTTON, INPUT_PULLUP);
   pinMode(SWITCH, INPUT_PULLUP);
   pinMode(LEFT_TEAM_BUTTON, INPUT_PULLUP);
   pinMode(RIGHT_TEAM_BUTTON, INPUT_PULLUP);

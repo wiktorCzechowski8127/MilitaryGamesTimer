@@ -120,7 +120,7 @@ void startGame(menuBaseS* menuBase)
 *******************************************************************************/
 void validateTime(humanTimeT* time)
 {
-    if(*time > 65515)
+    if(*time > 65515) //TODO Uintmax
     {
         *time = 0;
     }
@@ -284,13 +284,14 @@ void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT timeLimit = UINT32
   }
 }
 
+//TODO fix below.
 /* > Function setBoolean
 *******************************************************************************/
 /**
  * @brief Setting boolean option of gamemode .
  * 
- * @param[in] timeInMs     Pointer to time in Ms to set.
- * @param[in] minutesOnly  Information about using only minutes and seconds.
+ * @param[in] timeInMs     Pointer to value to set.
+ * @param[in] minutesOnly  Value limit.
  * @return void
  * 
 *******************************************************************************/
@@ -326,6 +327,125 @@ void setBoolean(bool* option)
     }
 }
 
+/* > Function setValue
+*******************************************************************************/
+/**
+ * @brief Setting uint option of gamemode.
+ * 
+ * @param[in] valueToModify   Pointer to value to set.
+ * @param[in] valueLimit      Treshold for valueToModify.
+ * @return void
+ * 
+*******************************************************************************/
+void setValue(int* valueToModify, int valueLimit)
+{
+
+
+  unsigned short cursorPosition = 2;
+  unsigned short monthOnlyPositionTreshold = 0;
+
+  bool isButtonPushed = false;
+  bool isUpOrDownButtonPused = false;
+  short operand = 1;
+
+  // Printing status on lcd
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("USTAW WARTOSC");
+  printValueOption(valueToModify, false);
+  lcd.setCursor(cursorPosition,1);
+  lcd.blink();
+
+  // Main function loop
+  bool processLoop = true;
+  while(processLoop)
+  {
+    isUpOrDownButtonPused = false;
+    isButtonPushed = false;
+
+    // Reading button status
+    if(buttonPushed(UP_BUTTON))
+    {
+      Serial.println("up");
+      isButtonPushed = true;
+      isUpOrDownButtonPused = true;
+      operand = 1;
+    }
+    if(buttonPushed(DOWN_BUTTON))
+    {
+      isButtonPushed = true;
+      isUpOrDownButtonPused = true;
+      operand = -1;
+    }
+    if(buttonPushed(RIGHT_BUTTON))
+    {
+      isButtonPushed = true;
+      cursorPosition++;
+    }
+    if(buttonPushed(LEFT_BUTTON))
+    {
+      isButtonPushed = true;
+      cursorPosition--;
+    }
+
+    if((cursorPosition >= 2) && (cursorPosition <= 6))
+    {
+      // Proceding up/down buttons
+      if(isUpOrDownButtonPused)
+      {
+        Serial.println(cursorPosition);
+        switch (cursorPosition)
+        {
+        case 2:
+          *valueToModify += (10000 * operand);
+          Serial.println("1: "+ (String)*valueToModify); 
+          break;
+        case 3:
+          *valueToModify += (1000 * operand);
+          Serial.println("2: "+ (String)*valueToModify); 
+          break;
+        case 4:
+          *valueToModify += (100 * operand);
+          Serial.println("3: "+ (String)*valueToModify); 
+          break;
+        case 5:
+          *valueToModify += (10 * operand);
+          Serial.println("4: "+ (String)*valueToModify); 
+          break;
+        case 6:
+          *valueToModify += (1 * operand);
+          Serial.println("5: "+ (String)*valueToModify); 
+          break;
+        default:
+          break;
+        }
+
+        if(*valueToModify > valueLimit)
+        {
+          *valueToModify = valueLimit;
+          Serial.println("limit"); 
+        }
+        else if(*valueToModify < 0)
+        {
+          *valueToModify = 0;
+          Serial.println("zero"); 
+        }
+        //Serial.println(*valueToModify); 
+      }
+      // Printing status on lcd
+      if(isButtonPushed)
+      {   
+        printValueOption(valueToModify, false);
+        lcd.setCursor(cursorPosition,1);
+      }
+    }
+    else
+    {
+      processLoop = false;
+    }
+  }
+  lcd.noBlink();
+}
 
 /* > Function convertMsTo3var
 *******************************************************************************/
@@ -372,6 +492,30 @@ void printBoolOption(const bool* const option)
     }
 }
 
+/* > Function printValueOption
+*******************************************************************************/
+/**
+ * @brief Printing value status of option on lcd.
+ * 
+ * @param[in] value        Status to modify
+ * @return void
+ * 
+*******************************************************************************/
+void printValueOption(const int* const value, bool spaceFill)
+{
+    lcd.setCursor(UINT_OPTION_CURSOR_POS,1); // TODO change this and desc
+    char valueToPrint[10] = "";
+    if(spaceFill)
+    {
+      snprintf(valueToPrint, sizeof valueToPrint, "% 5d", *value);
+    }
+    else
+    {
+      snprintf(valueToPrint, sizeof valueToPrint, "%05d", *value);   
+    }
+    lcd.print(valueToPrint);
+}
+
 /* > Function setBombGamemodeDomination
 *******************************************************************************/
 /**
@@ -401,11 +545,13 @@ void setDefaultGamemodeBomb(gamemodeBombS* gm)
 *******************************************************************************/
 void setDefaultGamemodeDomination(gamemodeDominationS* gm)
 {
-    gm->gameTime = (0 * HOURS_IN_MS + 60 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
+    gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 5 * SECONDS_IN_MS);
     gm->fullTakeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
     gm->takeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 2 * SECONDS_IN_MS);
     gm->pointTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);
     gm->enableSwitch = false;
+    gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
+    gm->winningPointsLimit = 45;
 }
 
 /* > Function initializeMenu
@@ -499,7 +645,13 @@ void printDominationOptions(const menuBaseS* const menuBase)
             printTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true);
             break;
         case 4:
+            printValueOption(&menuBase->gamemodeData.gamemodeDomination.winningPointsLimit, true); // TODO think about that, and about move it ot common
+            break;
+        case 5:
             printBoolOption(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
+            break;
+        case 6:
+            printTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, false);
             break;
         default:
             break;
@@ -708,9 +860,19 @@ void validateStage1_2Position(menuBaseS* menuBase)
             (menuBase->gamemodeData.gamemodeDomination.pointTime == 0) ? menuBase->gamemodeData.gamemodeDomination.pointTime = SECONDS_IN_MS : menuBase->gamemodeData.gamemodeDomination.pointTime;
             break;
         case 4:
-            setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
+            setValue(&menuBase->gamemodeData.gamemodeDomination.winningPointsLimit, 10000);
+            if(menuBase->gamemodeData.gamemodeDomination.winningPointsLimit == 0)
+            {
+              menuBase->gamemodeData.gamemodeDomination.winningPointsLimit = 1;
+            }
             break;
         case 5:
+            setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
+            break;
+        case 6:
+            setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
+            break;
+        case 7:
             startGame(menuBase);
         default:
             break;
@@ -788,8 +950,8 @@ void processMenu()
     bool isButtonPushed = false;
 
     //DEBUG
-    processDomination(&menuBase.gamemodeData.gamemodeDomination);
-    initializeMenu(&menuBase);
+    //processDomination(&menuBase.gamemodeData.gamemodeDomination);
+    //initializeMenu(&menuBase);
     //DEBUG
 
     while(true)

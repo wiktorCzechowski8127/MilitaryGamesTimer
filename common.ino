@@ -47,3 +47,18 @@ void printTime(const msTimeT* const timeInMs, bool minutesOnly)
     }
     lcd.print(valueToPrint);
 }
+
+/* > Function beep
+*******************************************************************************/
+/**
+ * @brief Short buzzer sound.
+ * 
+ * @return void
+ * 
+*******************************************************************************/
+void beep()
+{
+  digitalWrite(BUZZER, true);
+  delay(BEEP_TIME);
+  digitalWrite(BUZZER, false);
+}

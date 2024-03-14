@@ -6,6 +6,8 @@
 /* > Defines ******************************************************************/
 #define COOLDOWN 20
 
+#define RELAY 3
+#define BUZZER 4
 #define SWITCH 5
 #define LEFT_TEAM_BUTTON 6
 #define RIGHT_TEAM_BUTTON 7

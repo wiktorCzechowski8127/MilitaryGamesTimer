@@ -1,12 +1,14 @@
 #include "gamemodeCommon.hpp"
 
-void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametime)
+void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametime, const msTimeT* const alarmSpeakerTime)
 {
   memset(timing, 0, sizeof(timing));
+  timing->isGameRunning = true;
   timing->endgame = millis() + *gametime;
   timing->timeLeft = 0;
   timing->currentTime = 0;
   timing->lastCurrentTime = 0; //DEBUG
+  timing->alarmSpeakerEnd = *alarmSpeakerTime;
   //DEBUG 
   Serial.println("");
   Serial.println("GAMEMODE");    
@@ -14,6 +16,7 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
   Serial.println("timeLeft: " + (String)timing->timeLeft);
   Serial.println("currentTime: " + (String)timing->currentTime);
   Serial.println("lastCurrentTime: " + (String)timing->lastCurrentTime);
+  Serial.println("alarmSpeakerEnd: " + (String)timing->alarmSpeakerEnd);
 }
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
@@ -23,6 +26,8 @@ bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
   {
     isGameRunning = false;
     timing->timeLeft = 0;
+    timing->alarmSpeakerEnd = timing->alarmSpeakerEnd + millis();
+    digitalWrite(RELAY, true);
   }
   else
   {
