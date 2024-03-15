@@ -5,6 +5,7 @@
 #include <LiquidCrystal_I2C.h>
 #include "common.hpp"
 #include "domination.hpp"
+#include "bomb.hpp"
 #include "buttons.hpp"
 
 /* > Defines ******************************************************************/
@@ -13,7 +14,7 @@
 
 #define AMMOUNT_OF_LCD_CHARS 14
 
-#define STAGE_1_1_OPTIONS 6
+#define STAGE_1_1_OPTIONS 7
 #define STAGE_1_2_OPTIONS 8
 
 #define BOMB_GAMEMODE 0
@@ -46,22 +47,6 @@
 extern LiquidCrystal_I2C lcd;
 
 /*******************************************************************************
- * struct: gamemodeBombS
- * 
- * @brief Bomb gamemode options. Ammount of options: 3
- * 
-*******************************************************************************/
-struct gamemodeBombS
-{   
-    // STAGE_1_1_OPTIONS 3
-    msTimeT gameTime;
-    msTimeT armingTime;
-    msTimeT defusingTime;
-    bool enableSwitch;
-    bool slowReversing;
-};
-
-/*******************************************************************************
  * struct: gamemodeDataS
  * 
  * @brief Colective structure with gamemodes.
@@ -88,6 +73,7 @@ struct menuStringsS
                                                                 "ROZBRAJANIE",
                                                                 "PRZELACZNIK",
                                                                 "COFANIE PROG.",
+                                                                "SYRENA",
                                                                 "START"};
 
     char stringDomination[STAGE_1_2_OPTIONS][AMMOUNT_OF_LCD_CHARS] = {"CZAS GRY",
@@ -151,8 +137,8 @@ void printMenuStage0(const menuBaseS* const menuBase);
 void printMenu(const menuBaseS* const menuBaseS);
 
 void validateStage0Position(unsigned short* currentMenuPosition);
-void validateStage1_1Position(menuNavigationS* navigation, gamemodeBombS* gm);
-void validateStage1_2Position(menuNavigationS* navigation, gamemodeDominationS* gm);
+void validateStage1_1Position(menuBaseS* menuBase);
+void validateStage1_2Position(menuBaseS* menuBase);
 void validateMenuPositionWrapper(menuNavigationS* navigation, gamemodeDataS* gamemodeData);
 
 void setDefaultGamemodeBomb(gamemodeBombS* gm);

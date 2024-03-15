@@ -66,16 +66,20 @@ bool validateWinningPoints(const unsigned int* const points, const unsigned int*
   return true;
 }
 
-void initializeProgressBarData(progressBarDataS* data, const gamemodeDominationS* const gm) {
-  if (gm->takeOverTime != gm->fullTakeOverTime) {
+void dominationInitializeProgressBarData(progressBarDataS* data, const gamemodeDominationS* const gm){
+  if (gm->takeOverTime != gm->fullTakeOverTime) 
+  {
     data->ammountOfStages = BAR_TYPE_TWO_TEAMS;
     data->takeOverStageSquares = round(AMMOUNT_OF_SQUARES_PER_TEAM * ((float)gm->takeOverTime / gm->fullTakeOverTime));
     if (data->takeOverStageSquares == AMMOUNT_OF_SQUARES_PER_TEAM) {
       data->takeOverStageSquares--;
-    } else if (data->takeOverStageSquares == 0) {
+    } 
+    else if (data->takeOverStageSquares == 0) 
+    {
       data->takeOverStageSquares++;
     }
-  } else {
+  } 
+  else {
     data->ammountOfStages = BAR_TYPE_TWO_TEAMS;
     data->takeOverStageSquares = AMMOUNT_OF_SQUARES_PER_TEAM;
   }
@@ -131,7 +135,7 @@ void processDomination(const gamemodeDominationS* const gm) {
   initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker);
 
   progressBarDataS progressBarData;
-  initializeProgressBarData(&progressBarData, gm);
+  dominationInitializeProgressBarData(&progressBarData, gm);
 
   dominationDataS data;
   memset(&data, 0, sizeof(data));

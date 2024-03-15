@@ -55,16 +55,12 @@ struct dominationDataS
 };
 
 /* > Functions ****************************************************************/
-
-void dominationMain();
-void setScren();
-
 void printWinningPoints(const unsigned int* const leftTeamWinningPoints, const unsigned int* const rightTeamWinningPoints, bool printOnLowerPart);
 void printSummary(const msTimeT* const gameTime, const msTimeT* const runningTime ,const unsigned int* const leftTeamWinningPoints, const unsigned int* const rightTeamWinningPoints);
 
 void clearButtonsStatus(dominationDataS* data);
 bool validateWinningPoints(const unsigned int* const points, const unsigned int* const limit, msTimeT* alarmSpeakerEnd);
-void initializeProgressBarData(progressBarDataS* data);
+void dominationInitializeProgressBarData(progressBarDataS* data, const gamemodeDominationS* const gm);
 void calculateFilledSquares(const gamemodeDominationS* const gm, progressBarDataS* progressBarData, const long int* const pointsInMs);
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm); //DEBUG
 

@@ -2,112 +2,70 @@
 
 void startGame(menuBaseS* menuBase)
 {
-    if(menuBase->navigation.menuPosition[0] == BOMB_GAMEMODE)
+  bool startButtonKeepPushed = false;
+  unsigned long pushingTime = 0;
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("STARTUJE TRYB");
+  lcd.setCursor(0,1);
+  if(menuBase->navigation.menuPosition[0] == BOMB_GAMEMODE)
+  {
+    lcd.print("BOMBY");
+  }
+  else if(menuBase->navigation.menuPosition[0] == DOMINATION_GAMEMODE)
+  {
+    lcd.print("DOMINACJI");
+  }
+  while (true)
+  {
+    startButtonKeepPushed = false;
+    if(buttonPushed(UP_BUTTON))
     {
-        bool startButtonKeepPushed = false;
-        unsigned long pushingTime = 0;
-        lcd.clear();
-        lcd.setCursor(0,0);
-        lcd.print("STARTUJE TRYB");
-        lcd.setCursor(0,1);
-        lcd.print("BOMBY");
-        while (true)
-        {
-            startButtonKeepPushed = false;
-            if(buttonPushed(UP_BUTTON))
-            {
-                Serial.println("up");
-                break;
-            }
-            if(digitalRead(DOWN_BUTTON) == 0)
-            {
-                startButtonKeepPushed = true;
-                if(pushingTime == 0)
-                {
-                    pushingTime = millis();
-                }
-            }
-
-            if(startButtonKeepPushed == true)
-            {
-                if(millis() > (pushingTime + 3000))
-                {
-                    lcd.clear();
-                    lcd.setCursor(0,0);
-                    lcd.print("WYSTARTOWANO");
-                    while(1);
-                }
-                else
-                {   
-                    lcd.setCursor(13,1);
-                    if(millis() > (pushingTime + 0)) lcd.print(".");
-                    if(millis() > (pushingTime + 1000)) lcd.print(".");
-                    if(millis() > (pushingTime + 2000)) lcd.print(".");
-                }
-            }
-            else
-            {
-                lcd.setCursor(13,1);
-                lcd.print("   ");
-                pushingTime = 0;
-            }
-        }
+      Serial.println("up");
+      break;
     }
-    else if(menuBase->navigation.menuPosition[0] == DOMINATION_GAMEMODE)
+    if(digitalRead(DOWN_BUTTON) == 0)
     {
-        bool startButtonKeepPushed = false;
-        unsigned long pushingTime = 0;
-        lcd.clear();
-        lcd.setCursor(0,0);
-        lcd.print("STARTUJE TRYB");
-        lcd.setCursor(0,1);
-        lcd.print("DOMINACJI");
-        while (true)
-        {
-            startButtonKeepPushed = false;
-            if(buttonPushed(UP_BUTTON))
-            {
-                Serial.println("up");
-                break;
-            }
-            if(digitalRead(DOWN_BUTTON) == 0)
-            {
-                startButtonKeepPushed = true;
-                if(pushingTime == 0)
-                {
-                    pushingTime = millis();
-                }
-            }
-
-            if(startButtonKeepPushed == true)
-            {
-                if(millis() > (pushingTime + 3000))
-                {
-                    lcd.clear();
-                    lcd.setCursor(0,0);
-                    lcd.print("WYSTARTOWANO");
-                    processDomination(&menuBase->gamemodeData.gamemodeDomination);
-                    menuBase->navigation.menuStage = 0;
-                    menuBase->navigation.freezeMenu = true;
-                    break;
-                }
-                else
-                {   
-                    lcd.setCursor(13,1);
-                    if(millis() > (pushingTime + 0)) lcd.print(".");
-                    if(millis() > (pushingTime + 1000)) lcd.print(".");
-                    if(millis() > (pushingTime + 2000)) lcd.print(".");
-                }
-            }
-            else
-            {
-                lcd.setCursor(13,1);
-                lcd.print("   ");
-                pushingTime = 0;
-            }
-        }
+      startButtonKeepPushed = true;
+      if(pushingTime == 0)
+      {
+        pushingTime = millis();
+      }
     }
+
+    if(startButtonKeepPushed == true)
+    {
+      if(millis() > (pushingTime + 3000))
+      {
+        if(menuBase->navigation.menuPosition[0] == BOMB_GAMEMODE)
+        {
+          processBomb(&menuBase->gamemodeData.gamemodeBomb);
+        }
+        else if(menuBase->navigation.menuPosition[0] == DOMINATION_GAMEMODE)
+        {
+          processDomination(&menuBase->gamemodeData.gamemodeDomination);
+        }     
+        menuBase->navigation.menuStage = 0;
+        menuBase->navigation.freezeMenu = true;
+        break;
+      }
+      else
+      {   
+        lcd.setCursor(13,1);
+        if(millis() > (pushingTime + 0)) lcd.print(".");
+        if(millis() > (pushingTime + 1000)) lcd.print(".");
+        if(millis() > (pushingTime + 2000)) lcd.print(".");
+      }
+    }
+    else
+    {
+      lcd.setCursor(13,1);
+      lcd.print("   ");
+      pushingTime = 0;
+    }
+  }
 }
+
 
 /* > Function validateTime
 *******************************************************************************/
@@ -527,11 +485,12 @@ void printValueOption(const int* const value, bool spaceFill)
 *******************************************************************************/
 void setDefaultGamemodeBomb(gamemodeBombS* gm)
 {
-    gm->gameTime = (0 * HOURS_IN_MS + 50 * MINUTES_IN_MS + 45 * SECONDS_IN_MS);
-    gm->armingTime = (0 * HOURS_IN_MS + 50 * MINUTES_IN_MS + 40 * SECONDS_IN_MS);
-    gm->defusingTime = (0 * HOURS_IN_MS + 50 * MINUTES_IN_MS + 35 * SECONDS_IN_MS);
+    gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 45 * SECONDS_IN_MS);
+    gm->armingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
+    gm->defusingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
     gm->enableSwitch = true;
     gm->slowReversing = false;
+    gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
 }
 
 /* > Function setDefaultGamemodeDomination
@@ -608,6 +567,8 @@ void printBombOptions(const menuBaseS* const menuBase)
         case 4:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
             break;
+        case 5:
+            printTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, false);
         default:
             break;
         }
@@ -787,6 +748,9 @@ void validateStage1_1Position(menuBaseS* menuBase)
             setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
             break;
         case 5:
+            setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
+            break;
+        case 6:
             startGame(menuBase);
             break;    
         default:
@@ -859,17 +823,17 @@ void validateStage1_2Position(menuBaseS* menuBase)
             // Zero case -> 1sec   
             (menuBase->gamemodeData.gamemodeDomination.pointTime == 0) ? menuBase->gamemodeData.gamemodeDomination.pointTime = SECONDS_IN_MS : menuBase->gamemodeData.gamemodeDomination.pointTime;
             break;
-        case 4:
+        case 4: // winning points limit
             setValue(&menuBase->gamemodeData.gamemodeDomination.winningPointsLimit, 10000);
             if(menuBase->gamemodeData.gamemodeDomination.winningPointsLimit == 0)
             {
               menuBase->gamemodeData.gamemodeDomination.winningPointsLimit = 1;
             }
             break;
-        case 5:
+        case 5: // switch
             setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
             break;
-        case 6:
+        case 6: // alarm Speaker
             setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
             break;
         case 7:
