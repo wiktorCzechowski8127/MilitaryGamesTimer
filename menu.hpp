@@ -14,7 +14,7 @@
 
 #define AMMOUNT_OF_LCD_CHARS 14
 
-#define STAGE_1_1_OPTIONS 7
+#define STAGE_1_1_OPTIONS 8
 #define STAGE_1_2_OPTIONS 8
 
 #define BOMB_GAMEMODE 0
@@ -72,6 +72,7 @@ struct menuStringsS
                                                                 "UZBRAJANIE",
                                                                 "ROZBRAJANIE",
                                                                 "PRZELACZNIK",
+                                                                "ROZ. KONCZY GRE",
                                                                 "COFANIE PROG.",
                                                                 "SYRENA",
                                                                 "START"};

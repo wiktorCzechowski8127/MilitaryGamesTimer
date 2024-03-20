@@ -4,7 +4,16 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
 {
   memset(timing, 0, sizeof(timing));
   timing->isGameRunning = true;
-  timing->endgame = millis() + *gametime;
+  if(*gametime == 0)
+  {
+    timing->isUnlimitedTime = true;
+    timing->endgame = millis();
+  }
+  else
+  {
+    timing->isUnlimitedTime = false;
+    timing->endgame = millis() + *gametime;
+  }
   timing->timeLeft = 0;
   timing->currentTime = 0;
   timing->lastCurrentTime = 0; //DEBUG
@@ -17,24 +26,117 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
   Serial.println("currentTime: " + (String)timing->currentTime);
   Serial.println("lastCurrentTime: " + (String)timing->lastCurrentTime);
   Serial.println("alarmSpeakerEnd: " + (String)timing->alarmSpeakerEnd);
+  Serial.println("isUnlimitedTime: " + (String)timing->isUnlimitedTime);
 }
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
 {
   bool isGameRunning = true;
-  if(timing->currentTime > timing->endgame)
+  if(timing->currentTime > timing->endgame && timing->isUnlimitedTime == false)
   {
     isGameRunning = false;
     timing->timeLeft = 0;
-    timing->alarmSpeakerEnd = timing->alarmSpeakerEnd + millis();
-    digitalWrite(RELAY, true);
+    timing->turnSpeakerAlarmOn = true;
   }
   else
   {
-    timing->timeLeft = timing->endgame - timing->currentTime;
-    lcd.setCursor(4,0);
+    if(timing->isUnlimitedTime == true)
+    {
+      timing->timeLeft = timing->currentTime - timing->endgame;
+    }
+    else
+    {
+      timing->timeLeft = timing->endgame - timing->currentTime;
+    }
     printTime(&timing->timeLeft, false);
     //Serial.println(timing->timeLeft); //DEBUG
   }
   return isGameRunning;
+}
+
+void verifyEndGame(gamemodeTiming* timing, uint8_t lcdpos1, uint8_t lcdpos2)
+{
+  if (timing->isGameRunning == true) 
+  {
+    lcd.setCursor(lcdpos1,lcdpos2);
+    timing->isGameRunning = valideateEndGameOrPrintTimeLeft(timing);
+
+    // Turning game off using buttons.
+    timing->endButtonsKeepPushed = false;
+    if (!digitalRead(LEFT_BUTTON) && !digitalRead(RIGHT_BUTTON))
+    {
+      timing->endButtonsKeepPushed = true;
+      if (timing->buttonPushingTime == 0) 
+      {
+        timing->buttonPushingTime = timing->currentTime;
+      }
+    }
+    if (timing->endButtonsKeepPushed == true) 
+    {
+      if (timing->currentTime > (timing->buttonPushingTime + 2000)) 
+      {
+        timing->isGameRunning = false;
+      }
+    } 
+    else
+    {
+      timing->buttonPushingTime = 0;
+    }
+  }
+}
+
+void processGameSummary(gamemodeTiming* timing)
+{
+  delay(FREEZE_TIME);
+  uint8_t endButtonKeepPushed = false;
+  msTimeT pushingTime = 0;
+
+  if(timing->turnSpeakerAlarmOn)
+  {
+    timing->alarmSpeakerEnd = timing->alarmSpeakerEnd + millis();
+    digitalWrite(RELAY, true);
+  }
+
+  while (true)
+  {
+    timing->currentTime = millis();
+    endButtonKeepPushed = false;
+
+    if (!digitalRead(LEFT_BUTTON) && !digitalRead(RIGHT_BUTTON))
+    {
+      endButtonKeepPushed = true;
+      if (pushingTime == 0)
+      {
+        pushingTime = timing->currentTime;
+      }
+    }
+    if (endButtonKeepPushed == true)
+    {
+      if (timing->currentTime > (pushingTime + 2000))
+      {
+        if (timing->turnSpeakerAlarmOn == true) 
+        {
+          digitalWrite(RELAY, false);
+          pushingTime = 0;
+          timing->turnSpeakerAlarmOn = false;
+          Serial.println("EXIT");
+        } 
+        else
+        {
+          break;
+        }
+      }
+    } 
+    else
+    {
+      pushingTime = 0;
+    }
+    if ((timing->currentTime > timing->alarmSpeakerEnd) && (timing->turnSpeakerAlarmOn == true))
+    {
+      digitalWrite(RELAY, false);
+      timing->alarmSpeakerEnd = 0;
+      timing->turnSpeakerAlarmOn = false;
+    }
+    //Serial.println("MILLIS: " + String(millis()) + " ALARM SPEAKER END " + String(timing.alarmSpeakerEnd));
+  }
 }

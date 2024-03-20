@@ -491,6 +491,7 @@ void setDefaultGamemodeBomb(gamemodeBombS* gm)
     gm->enableSwitch = true;
     gm->slowReversing = false;
     gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
+    gm->isDefuseEndGame = true;
 }
 
 /* > Function setDefaultGamemodeDomination
@@ -565,9 +566,12 @@ void printBombOptions(const menuBaseS* const menuBase)
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
             break;
         case 4:
+            printBoolOption(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
+            break;
+        case 6:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
             break;
-        case 5:
+        case 7:
             printTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, false);
         default:
             break;
@@ -745,12 +749,15 @@ void validateStage1_1Position(menuBaseS* menuBase)
             setBoolean(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
             break;
         case 4:
-            setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
+            setBoolean(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
             break;
         case 5:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
+            setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
             break;
         case 6:
+            setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
+            break;
+        case 7:
             startGame(menuBase);
             break;    
         default:
@@ -787,14 +794,15 @@ void validateStage1_2Position(menuBaseS* menuBase)
     {
         switch (menuBase->navigation.menuPosition[1])
         {
-        case 0:
+        case 0: // gameTime
             setTime(&menuBase->gamemodeData.gamemodeDomination.gameTime, false);
             // Zero case -> 1 sec
             (menuBase->gamemodeData.gamemodeDomination.pointTime == 0) ? menuBase->gamemodeData.gamemodeDomination.pointTime = SECONDS_IN_MS : menuBase->gamemodeData.gamemodeDomination.pointTime;
 
             // Pointing time > gameTime
-            if(menuBase->gamemodeData.gamemodeDomination.pointTime >
-               menuBase->gamemodeData.gamemodeDomination.gameTime)
+            if((menuBase->gamemodeData.gamemodeDomination.pointTime >
+                  menuBase->gamemodeData.gamemodeDomination.gameTime) && 
+               (menuBase->gamemodeData.gamemodeDomination.gameTime != 0))
             {
               menuBase->gamemodeData.gamemodeDomination.pointTime = 
                 menuBase->gamemodeData.gamemodeDomination.gameTime;
@@ -819,15 +827,23 @@ void validateStage1_2Position(menuBaseS* menuBase)
             (menuBase->gamemodeData.gamemodeDomination.takeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 1 : menuBase->gamemodeData.gamemodeDomination.takeOverTime;
             break;
         case 3: // pointTime
-            setTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true, menuBase->gamemodeData.gamemodeDomination.gameTime); // case with limit
-            // Zero case -> 1sec   
+            if(menuBase->gamemodeData.gamemodeDomination.gameTime == 0)
+            {
+              setTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true, HOURS_IN_MS); // case with limit
+            }
+            else
+            {
+              setTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true, menuBase->gamemodeData.gamemodeDomination.gameTime);
+            }
+            // Zero case -> 1sec
+            // TODO: fix this
             (menuBase->gamemodeData.gamemodeDomination.pointTime == 0) ? menuBase->gamemodeData.gamemodeDomination.pointTime = SECONDS_IN_MS : menuBase->gamemodeData.gamemodeDomination.pointTime;
             break;
         case 4: // winning points limit
-            setValue(&menuBase->gamemodeData.gamemodeDomination.winningPointsLimit, 10000);
+            setValue(&menuBase->gamemodeData.gamemodeDomination.winningPointsLimit, 30000);
             if(menuBase->gamemodeData.gamemodeDomination.winningPointsLimit == 0)
             {
-              menuBase->gamemodeData.gamemodeDomination.winningPointsLimit = 1;
+              menuBase->gamemodeData.gamemodeDomination.winningPointsLimit = 30000;
             }
             break;
         case 5: // switch
@@ -914,7 +930,7 @@ void processMenu()
     bool isButtonPushed = false;
 
     //DEBUG
-    //processDomination(&menuBase.gamemodeData.gamemodeDomination);
+    processBomb(&menuBase.gamemodeData.gamemodeBomb);
     //initializeMenu(&menuBase);
     //DEBUG
 

@@ -34,6 +34,9 @@
 #define LEFT_TEAM 0
 #define RIGHT_TEAM 1
 
+// NO TEAM - BOMB
+#define NO_TEAM_PROGRESS_BAR_CHARACTERS 10
+
 /* > Typedefs *****************************************************************/
 
 /* > Externs ******************************************************************/
@@ -42,11 +45,11 @@ extern LiquidCrystal_I2C lcd; // TODO - verify is that correct
 /* > Structures ***************************************************************/
 struct progressBarDataS
 {
-  unsigned int ammountOfStages: 2;
+  unsigned int ammountOfStages: 1;
   unsigned int takeOverStageSquares: 4;
   unsigned int filledSquared: 4;
   unsigned int filledSite: 1;
-  unsigned int padding: 5;
+  unsigned int padding: 6;
   msTimeT timeOfOneTakeOverSquareFilled;
   msTimeT timeOfOneFullTakeOverSquareFilled;
 };
@@ -54,5 +57,6 @@ struct progressBarDataS
 /* > Functions ****************************************************************/
 void createProgressBarCharacters();
 void printtwoZonesProgresBar(const progressBarDataS* const data);
+void printNoTeamsProgressBar(const progressBarDataS* const data);
 void printProgressBar(const progressBarDataS* const data);
 #endif

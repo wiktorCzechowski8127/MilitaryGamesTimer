@@ -1,3 +1,4 @@
+#include <stdint.h>
 #ifndef BOMB_H
 #define BOMB_H
 
@@ -9,7 +10,10 @@
 #include "buttons.hpp"
 
 /* > Defines ******************************************************************/
+#define BOMB_UNARMED 0
+#define BOMB_ARMED 1
 
+#define CLEAR_BOMB_STATUS false
 /* > Typedefs *****************************************************************/
 
 /* > Externs ******************************************************************/
@@ -27,26 +31,33 @@ struct gamemodeBombS
 {   
     // STAGE_1_1_OPTIONS 3
     msTimeT gameTime;
+    msTimeT explosionTime;
     msTimeT armingTime;
     msTimeT defusingTime;
+    msTimeT alarmSpeaker;
     bool enableSwitch;
     bool slowReversing;
-    msTimeT alarmSpeaker;
+    bool isDefuseEndGame;
+    bool isArmingResetExplosionTime;
 };
 
 struct bombDataS
 {
   msTimeWithSingT pointsInMs;
   msTimeT lastPushedButtonTimeStamp;
-
+  uint8_t swithStatus : 1;
+  uint8_t isButtonsPushed : 1;
+  uint8_t currentBombStatus : 1;
+  uint8_t padding : 5;
 };
 
 /* > Functions ****************************************************************/
 
-
-void processBomb(const gamemodeBombS* const gm);
-
 void bombInitializeProgressBarData(progressBarDataS* data, const gamemodeBombS* const gm);
+void calculateFilledSquaresBomb(const gamemodeBombS* const gm, progressBarDataS* progressBarData, const bombDataS* const bombData);
+
+void printBombStatus(bombDataS* const data, uint8_t printBombStatus = true);
+void processBomb(const gamemodeBombS* const gm);
 
 void printBombGamemodeSettingsOnSerial(const gamemodeBombS* const gm); //DEBUG
 #endif

@@ -28,13 +28,20 @@ struct gamemodeTiming
   msTimeT currentTime;
   msTimeT lastCurrentTime; //DEBUG
   msTimeT alarmSpeakerEnd;
+  msTimeT buttonPushingTime;
   uint8_t isGameRunning: 1;
-  uint8_t padding: 7;
+  uint8_t isUnlimitedTime: 1;
+  uint8_t turnSpeakerAlarmOn: 1;
+  uint8_t endButtonsKeepPushed: 1;
+  uint8_t padding: 4;
 };
 
 /* > Functions ****************************************************************/
 void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametime, const msTimeT* const alarmSpeakerTime);
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing);
+
+void verifyEndGame(gamemodeTiming* timing, uint8_t lcdpos1, uint8_t lcdpos2);
+void processGameSummary(gamemodeTiming* timing);
 
 #endif

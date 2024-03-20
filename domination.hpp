@@ -1,3 +1,4 @@
+#include <stdint.h>
 #ifndef DOMINATION_H
 #define DOMINATION_H
 
@@ -61,8 +62,10 @@ void printSummary(const msTimeT* const gameTime, const msTimeT* const runningTim
 void clearButtonsStatus(dominationDataS* data);
 bool validateWinningPoints(const unsigned int* const points, const unsigned int* const limit, msTimeT* alarmSpeakerEnd);
 void dominationInitializeProgressBarData(progressBarDataS* data, const gamemodeDominationS* const gm);
-void calculateFilledSquares(const gamemodeDominationS* const gm, progressBarDataS* progressBarData, const long int* const pointsInMs);
+void calculateFilledSquares(const gamemodeDominationS* const gm, progressBarDataS* progressBarData, const long int* const pointsInMs, gamemodeTiming* timing);
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm); //DEBUG
+
+bool calcWinningPointsAndCheckIsGameEnd(gamemodeTiming* timing, dominationDataS* data, gamemodeDominationS* gm);
 
 void processDomination(const gamemodeDominationS* const gm);
 

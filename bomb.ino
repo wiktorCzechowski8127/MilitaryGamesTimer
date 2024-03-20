@@ -1,35 +1,63 @@
-void bombInitializeProgressBarData(progressBarDataS* data, const gamemodeBombS* const gm){
-  data->ammountOfStages = BAR_TYPE_TWO_TEAMS;
-  
-  //if (gm->takeOverTime != gm->fullTakeOverTime) {
+#include "bomb.hpp"
 
-    /*
-    data->takeOverStageSquares = round(AMMOUNT_OF_SQUARES_PER_TEAM * ((float)gm->takeOverTime / gm->fullTakeOverTime));
-    if (data->takeOverStageSquares == AMMOUNT_OF_SQUARES_PER_TEAM) {
-      data->takeOverStageSquares--;
-    } else if (data->takeOverStageSquares == 0) {
-      data->takeOverStageSquares++;
-    }
-  } 
-  else 
+void bombInitializeProgressBarData(progressBarDataS* data, const gamemodeBombS* const gm)
+{
+  memset(data, 0, sizeof(progressBarDataS));
+  data->ammountOfStages = BAR_TYPE_NO_TEAMS;
+  data->takeOverStageSquares = 10;
+  data->filledSquared = 0;
+
+  //DEBUG
+  Serial.println("");
+  Serial.println("TIMING");
+  Serial.println("ammountOfStages: " + (String)data->ammountOfStages);
+  Serial.println("takeOverStageSquares: " + (String)data->takeOverStageSquares);
+  Serial.println("filledSquared: " + (String)data->filledSquared);
+}
+
+void calculateFilledSquaresBomb(const gamemodeBombS* const gm, progressBarDataS* progressBarData, const bombDataS* const bombData)
+{
+  if(bombData->currentBombStatus == BOMB_UNARMED)
   {
-    data->ammountOfStages = BAR_TYPE_TWO_TEAMS;
-    data->takeOverStageSquares = AMMOUNT_OF_SQUARES_PER_TEAM;
+    progressBarData->timeOfOneTakeOverSquareFilled = round((float)gm->armingTime / NO_TEAM_PROGRESS_BAR_CHARACTERS);
   }
+  else
+  {
+    progressBarData->timeOfOneTakeOverSquareFilled = round((float)gm->defusingTime / NO_TEAM_PROGRESS_BAR_CHARACTERS);
+  }
+  //TODO rename filledSquared
+  progressBarData->filledSquared = bombData->pointsInMs / progressBarData->timeOfOneTakeOverSquareFilled;
+  //DEBUG
+  Serial.println("filledSquared: " + (String)progressBarData->filledSquared + " pointsInMs: " + (String)bombData->pointsInMs);
+}
 
-  data->filledSite = 1;
-  data->timeOfOneTakeOverSquareFilled = (float)gm->takeOverTime / data->takeOverStageSquares;
-  data->timeOfOneFullTakeOverSquareFilled = (float)(gm->fullTakeOverTime - gm->takeOverTime) / (8 - data->takeOverStageSquares);
-  */
+void printBombStatus(bombDataS* const data, uint8_t printBombStatus = true)
+{
+  lcd.setCursor(FIRST_LCD_CHAR, 1);
+  if(printBombStatus == true)
+  {
+    if(data->currentBombStatus == BOMB_UNARMED)
+    {
+      lcd.print("UZB.");
+    }
+    else
+    {
+      lcd.print("ROZ.");
+    }
+  }
+  else
+  {
+    lcd.print("    ");
+    data->pointsInMs = 0;
+  }
 }
 
 void processBomb(const gamemodeBombS* const gm) {
   // Initialization
   lcd.clear();
-
-  bool isGameRunning = true;
-  bool endButtonKeepPushed = false;
-  bool exit = false;
+  //TODO move to data
+  bool clearPiontsAndBombStatus = false;
+  bool isAllowedToPushButtons = true;
   msTimeT pushingTime = 0;
   gamemodeTiming timing;
   initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker);
@@ -39,18 +67,20 @@ void processBomb(const gamemodeBombS* const gm) {
 
   bombDataS data;
   memset(&data, 0, sizeof(data));
-  /*
+
+  lcd.setCursor(0, 0);
+  lcd.print("POSILKI");
+
   //DEBUG
   printBombGamemodeSettingsOnSerial(gm);
-
+  
   // 3. LCD prints
-  printWinningPoints(&data.leftTeamWinningPoints, &data.rightTeamWinningPoints, false);
-  calculateFilledSquares(gm, &progressBarData, &data.pointsInMs);
+  calculateFilledSquaresBomb(gm, &progressBarData, &data);
   //Serial.println("WINNING SITE:" + (String)progressBarData.filledSite); // DEBUG
   printProgressBar(&progressBarData);
 
-
-  while (isGameRunning) {
+  while (timing.isGameRunning) 
+  {
     // 1. Calculating time
     timing.currentTime = millis();
     //Serial.println("TIMEDIFF: " + (String)(timing.currentTime - timing.lastCurrentTime));  //DEBUG
@@ -61,126 +91,112 @@ void processBomb(const gamemodeBombS* const gm) {
     //buttons is set as INPUT_PULLUP mode. If button is pushed digitalRead return 0.
 
     // 2.0 Checking switch status
-    if (gm->enableSwitch) {
+    if (gm->enableSwitch)
+    {
       data.swithStatus = digitalRead(SWITCH);
     }
-
     // 2.1 Right team
-    if (!data.swithStatus) {
-      if (!digitalRead(RIGHT_TEAM_BUTTON) && digitalRead(LEFT_TEAM_BUTTON)) {
+    if (!data.swithStatus)
+    {
+      if (!digitalRead(RIGHT_TEAM_BUTTON) && !digitalRead(LEFT_TEAM_BUTTON) && isAllowedToPushButtons)
+      {
         // Display button push character
-
+        printBombStatus(&data);
         // continous or first button push
-        if (data.isRightButtonPushed == true) {
+        if (data.isButtonsPushed == true) 
+        {
           // Calculating Points
           data.pointsInMs += (timing.currentTime - data.lastPushedButtonTimeStamp);
-
-          calculateFilledSquares(gm, &progressBarData, &data.pointsInMs);
-          //Serial.println("WINNING SITE:" + (String)progressBarData.filledSite); // DEBUG
-          printProgressBar(&progressBarData);
+          if(data.currentBombStatus == BOMB_UNARMED)
+          {
+            if(data.pointsInMs > gm->armingTime)
+            {
+              data.currentBombStatus = BOMB_ARMED;
+              lcd.setCursor(0, 0);
+              lcd.print("WYBUCH ");
+              clearPiontsAndBombStatus= true;
+              beep();
+              isAllowedToPushButtons = false;
+            }
+            else
+            {
+              calculateFilledSquaresBomb(gm, &progressBarData, &data);
+              //Serial.println("WINNING SITE:" + (String)progressBarData.filledSite); // DEBUG
+              printProgressBar(&progressBarData);
+            }
+          }
+          else
+          {
+            if(data.pointsInMs > gm->defusingTime)
+            {
+              data.currentBombStatus = BOMB_UNARMED;
+              lcd.setCursor(0, 0);
+              lcd.print("POSILKI");
+              clearPiontsAndBombStatus= true;
+              beep();
+              isAllowedToPushButtons = false;
+              if(gm->isDefuseEndGame)
+              {
+                timing.isGameRunning = false;
+                lcd.clear();
+                lcd.setCursor(0, 0);
+                lcd.print("ROZBROJONO");
+              }
+            }
+            else
+            {
+              calculateFilledSquaresBomb(gm, &progressBarData, &data);
+              //Serial.println("WINNING SITE:" + (String)progressBarData.filledSite); // DEBUG
+              printProgressBar(&progressBarData);
+            }
+          }
         } 
         else  //first button push
         {
-          data.isRightButtonPushed = true;
-          data.isLeftButtonPushed = false;
+          data.isButtonsPushed = true;
         }
 
         data.lastPushedButtonTimeStamp = timing.currentTime;
       }
-      // 2.2 Left Team
-      else if (!digitalRead(LEFT_TEAM_BUTTON) && digitalRead(RIGHT_TEAM_BUTTON)) {
-        // Display button push character
-
-        // continous or first button push
-        if (data.isLeftButtonPushed == true) {
-          // Calculating Points
-          data.pointsInMs -= (timing.currentTime - data.lastPushedButtonTimeStamp);
-
-          // 3. LCD prints
-          //printWinningPoints(&data.leftTeamWinningPoints, &data.rightTeamWinningPoints, false);
-          calculateFilledSquares(gm, &progressBarData, &data.pointsInMs);
-          //Serial.println("WINNING SITE:" + (String)progressBarData.filledSite); // DEBUG
-          printProgressBar(&progressBarData);
-        } else  //first button push
-        {
-          data.isRightButtonPushed = false;
-          data.isLeftButtonPushed = true;
-        }
-
-        data.lastPushedButtonTimeStamp = timing.currentTime;
-      } 
-      else  // No button pushed
+      else if (digitalRead(RIGHT_TEAM_BUTTON) && digitalRead(LEFT_TEAM_BUTTON) && isAllowedToPushButtons == false)
       {
-        //clearButtonsStatus(&data);
+        isAllowedToPushButtons = true;
       }
-    } 
+      else
+      {
+        if(data.isButtonsPushed == true)
+        {
+          clearPiontsAndBombStatus = true;
+        }
+        data.isButtonsPushed = false;
+        //printBombStatus(&data, CLEAR_BOMB_STATUS);
+      }
+    }
     else  // Blocked by switch
     {
+      if(data.isButtonsPushed == true)
+      {
+        clearPiontsAndBombStatus = true;
+      }
+      data.isButtonsPushed = false;
+      isAllowedToPushButtons = true;
+      //printBombStatus(&data, CLEAR_BOMB_STATUS);
       //clearButtonsStatus(&data);
     }
 
+    if(clearPiontsAndBombStatus)
+    {
+      printBombStatus(&data, CLEAR_BOMB_STATUS);
+      calculateFilledSquaresBomb(gm, &progressBarData, &data);
+      printProgressBar(&progressBarData);
+      clearPiontsAndBombStatus = false;
+    }
 
     // 4. Endgame weryfication
-    if (isGameRunning == true) {
-      isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
-
-      // Turning game off using buttons.
-      endButtonKeepPushed = false;
-      if (!digitalRead(LEFT_BUTTON) && !digitalRead(RIGHT_BUTTON)) {
-        endButtonKeepPushed = true;
-        if (pushingTime == 0) {
-          pushingTime = timing.currentTime;
-        }
-      }
-      if (endButtonKeepPushed == true) {
-        if (timing.currentTime > (pushingTime + 2000)) {
-          isGameRunning = false;
-          exit = true;
-        }
-      } else {
-        pushingTime = 0;
-      }
-    }
-  }  // End of main loop
-
-  // 5. Printing summary
-  printSummary(&gm->gameTime, &timing.timeLeft, &data.leftTeamWinningPoints, &data.rightTeamWinningPoints);
-
-  //TODO MOVE TO COMMON FUNCTION
-  delay(FREEZE_TIME);
-  endButtonKeepPushed = false;
-  pushingTime = 0;
-  while (true) {
-    timing.currentTime = millis();
-    endButtonKeepPushed = false;
-    if (!digitalRead(LEFT_BUTTON) && !digitalRead(RIGHT_BUTTON)) {
-      endButtonKeepPushed = true;
-      if (pushingTime == 0) {
-        pushingTime = timing.currentTime;
-      }
-    }
-    if (endButtonKeepPushed == true) {
-      if (timing.currentTime > (pushingTime + 2000)) {
-        if (exit == false) {
-          digitalWrite(RELAY, false);
-          pushingTime = 0;
-          exit = true;
-          Serial.println("EXIT");
-        } else {
-          break;
-        }
-      }
-    } else {
-      pushingTime = 0;
-    }
-    if ((timing.currentTime > timing.alarmSpeakerEnd) && (timing.alarmSpeakerEnd != 0)) {
-      digitalWrite(RELAY, false);
-      timing.alarmSpeakerEnd = 0;
-      exit = true;
-    }
-    //Serial.println("MILLIS: " + String(millis()) + " ALARM SPEAKER END " + String(timing.alarmSpeakerEnd));
+    // TODO make functions of this part
+    verifyEndGame(&timing, 8, 0);
   }
-  */
+  processGameSummary(&timing);
 }
 
 void printBombGamemodeSettingsOnSerial(const gamemodeBombS* const gm)

@@ -219,12 +219,56 @@ void printtwoZonesProgresBar(const progressBarDataS* const data)
   }    
 }
 
+void printNoTeamsProgressBar(const progressBarDataS* const data)
+{
+
+  for(int i = 0; i < NO_TEAM_PROGRESS_BAR_CHARACTERS; i++)
+  {
+    char charToPrint = CHAR_BOTTOM;
+    if(i == FIRST_LCD_CHAR)
+    {
+      if(data->filledSquared >= 1)
+      {
+        charToPrint = CHAR_LEFT_STRIP_FILLED;
+      }
+      else
+      {
+        charToPrint = CHAR_LEFT_STRIP;
+      }
+    }
+    else if(i == NO_TEAM_PROGRESS_BAR_CHARACTERS - 1)
+    {
+      if(data->filledSquared == NO_TEAM_PROGRESS_BAR_CHARACTERS)
+      {
+        charToPrint = CHAR_RIGHT_STRIP_FILLED;
+      }
+      else
+      {
+        charToPrint = CHAR_RIGHT_STRIP;
+      }
+    }
+    else
+    {
+      if(data->filledSquared >= (i + 1))
+      {
+        charToPrint = CHAR_FILLED;
+      }
+    }
+
+    lcd.setCursor((6 + i), 1);
+    lcd.write(byte(charToPrint));
+  }
+}
 
 void printProgressBar(const progressBarDataS* const data)
 {
   if(data->ammountOfStages == BAR_TYPE_TWO_TEAMS)
   {
     printtwoZonesProgresBar(data);
+  }
+  else if(data->ammountOfStages == BAR_TYPE_NO_TEAMS)
+  {
+    printNoTeamsProgressBar(data);
   }
 
 }
