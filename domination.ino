@@ -159,6 +159,17 @@ bool calcWinningPointsAndCheckIsGameEnd(gamemodeTiming* timing, dominationDataS*
   return gameKeepRunnung;
 }
 
+void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm) {
+  Serial.println(" ");
+  Serial.println("Dominacja ustawienia:");
+  Serial.println("gameTime: " + (String)gm->gameTime);
+  Serial.println("takeOverTime: " + (String)gm->takeOverTime);
+  Serial.println("fullTakeOverTime: " + (String)gm->fullTakeOverTime);
+  Serial.println("winningPointsLimit: " + (String)gm->winningPointsLimit);
+  Serial.println("enableSwitch: " + (String)gm->enableSwitch);
+  Serial.println("alarmSpeaker: " + (String)gm->alarmSpeaker);
+}
+
 void processDomination(const gamemodeDominationS* const gm)
 {
   // Initialization
@@ -316,15 +327,4 @@ void processDomination(const gamemodeDominationS* const gm)
   printSummary(&gm->gameTime, &timing.timeLeft, &data.leftTeamWinningPoints, &data.rightTeamWinningPoints);
   processGameSummary(&timing);
  
-}
-
-void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm) {
-  Serial.println(" ");
-  Serial.println("Dominacja ustawienia:");
-  Serial.println("gameTime: " + (String)gm->gameTime);
-  Serial.println("takeOverTime: " + (String)gm->takeOverTime);
-  Serial.println("fullTakeOverTime: " + (String)gm->fullTakeOverTime);
-  Serial.println("winningPointsLimit: " + (String)gm->winningPointsLimit);
-  Serial.println("enableSwitch: " + (String)gm->enableSwitch);
-  Serial.println("alarmSpeaker: " + (String)gm->alarmSpeaker);
 }

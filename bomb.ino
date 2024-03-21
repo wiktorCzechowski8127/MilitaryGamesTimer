@@ -204,8 +204,10 @@ void printBombGamemodeSettingsOnSerial(const gamemodeBombS* const gm)
   Serial.println(" ");
   Serial.println("Bomba ustawienia:");
   Serial.println("gameTime: " + (String)gm->gameTime);
+  Serial.println("explosionTime: " + (String)gm->explosionTime);
   Serial.println("armingTime: " + (String)gm->armingTime);
   Serial.println("defusingTime: " + (String)gm->defusingTime);
   Serial.println("enableSwitch: " + (String)gm->enableSwitch);
+  Serial.println("isDefuseEndGame: " + (String)gm->isDefuseEndGame);
   Serial.println("slowReversing: " + (String)gm->slowReversing);
 }

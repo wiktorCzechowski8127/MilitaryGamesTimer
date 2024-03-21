@@ -31,14 +31,13 @@ struct gamemodeBombS
 {   
     // STAGE_1_1_OPTIONS 3
     msTimeT gameTime;
-    msTimeT explosionTime;
     msTimeT armingTime;
     msTimeT defusingTime;
     msTimeT alarmSpeaker;
+    msTimeT explosionTime;
     bool enableSwitch;
     bool slowReversing;
     bool isDefuseEndGame;
-    bool isArmingResetExplosionTime;
 };
 
 struct bombDataS

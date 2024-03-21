@@ -14,7 +14,7 @@
 
 #define AMMOUNT_OF_LCD_CHARS 14
 
-#define STAGE_1_1_OPTIONS 8
+#define STAGE_1_1_OPTIONS 9
 #define STAGE_1_2_OPTIONS 8
 
 #define BOMB_GAMEMODE 0
@@ -67,17 +67,18 @@ struct gamemodeDataS
 struct menuStringsS
 {   
     char stringStage0[AMMOUNT_OF_GAMEMODES][AMMOUNT_OF_LCD_CHARS] = {"BOMBA", "DOMINACJA"};
-
+    /*
     char stringBomb[STAGE_1_1_OPTIONS][AMMOUNT_OF_LCD_CHARS] = {"CZAS GRY",
+                                                                "CZAS WYBUCHU",
                                                                 "UZBRAJANIE",
                                                                 "ROZBRAJANIE",
                                                                 "PRZELACZNIK",
-                                                                "ROZ. KONCZY GRE",
+                                                                "ROZ. KONCZY",
                                                                 "COFANIE PROG.",
                                                                 "SYRENA",
                                                                 "START"};
 
-    char stringDomination[STAGE_1_2_OPTIONS][AMMOUNT_OF_LCD_CHARS] = {"CZAS GRY",
+    char stringDomination[STAGE_1_1_OPTIONS][AMMOUNT_OF_LCD_CHARS] = {"CZAS GRY",
                                                                       "P. PRZEJECIE",
                                                                       "PRZEJECIE",
                                                                       "PUNKT CO",
@@ -85,6 +86,7 @@ struct menuStringsS
                                                                       "PRZELACZNIK",
                                                                       "SYRENA",
                                                                       "START"};
+                                                                      */
 };
 
 /*******************************************************************************

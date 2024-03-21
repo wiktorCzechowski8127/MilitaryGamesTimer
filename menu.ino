@@ -43,6 +43,8 @@ void startGame(menuBaseS* menuBase)
         }
         else if(menuBase->navigation.menuPosition[0] == DOMINATION_GAMEMODE)
         {
+          Serial.println("SRFAF");
+          printGamemodeSettingsOnSerial(&menuBase->gamemodeData.gamemodeDomination);
           processDomination(&menuBase->gamemodeData.gamemodeDomination);
         }     
         menuBase->navigation.menuStage = 0;
@@ -486,6 +488,7 @@ void printValueOption(const int* const value, bool spaceFill)
 void setDefaultGamemodeBomb(gamemodeBombS* gm)
 {
     gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 45 * SECONDS_IN_MS);
+    gm->explosionTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
     gm->armingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
     gm->defusingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
     gm->enableSwitch = true;
@@ -548,31 +551,55 @@ void printBombOptions(const menuBaseS* const menuBase)
 {       
         unsigned short position = menuBase->navigation.menuPosition[1];
         lcd.print((String)(menuBase->navigation.menuPosition[1] + 1) + 
-                    ". " + 
-                    menuBase->menuStrings.stringBomb[position]);
+                    ". ");
+                    //menuBase->menuStrings.stringBomb[position]);
         lcd.setCursor(0,1);
         switch (position)
         {
         case 0:
             printTime(&menuBase->gamemodeData.gamemodeBomb.gameTime, false);
+            lcd.setCursor(3,0);
+            lcd.print("CZAS GRY");
             break;
         case 1:
-            printTime(&menuBase->gamemodeData.gamemodeBomb.armingTime, true);
+            printTime(&menuBase->gamemodeData.gamemodeBomb.explosionTime, true);
+            lcd.setCursor(3,0);
+            lcd.print("CZAS WYBUCHU");
             break;
         case 2:
-            printTime(&menuBase->gamemodeData.gamemodeBomb.defusingTime, true);
+            printTime(&menuBase->gamemodeData.gamemodeBomb.armingTime, true);
+            lcd.setCursor(3,0);
+            lcd.print("UZBRAJANIE");
             break;
         case 3:
-            printBoolOption(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
+            printTime(&menuBase->gamemodeData.gamemodeBomb.defusingTime, true);
+            lcd.setCursor(3,0);
+            lcd.print("ROZBRAJANIE");
             break;
         case 4:
+            printBoolOption(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
+            lcd.setCursor(3,0);
+            lcd.print("PRZELACZNIK");
+            break;
+        case 5:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
+            lcd.setCursor(3,0);
+            lcd.print("ROZ. KONCZY");
             break;
         case 6:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
+            lcd.setCursor(3,0);
+            lcd.print("COFANIE PROG.");
             break;
         case 7:
             printTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, false);
+            lcd.setCursor(3,0);
+            lcd.print("SYRENA");
+            break;
+        case 8:
+            lcd.setCursor(3,0);
+            lcd.print("START");
+            break;
         default:
             break;
         }
@@ -592,31 +619,49 @@ void printDominationOptions(const menuBaseS* const menuBase)
         unsigned short position = menuBase->navigation.menuPosition[1];
 
         lcd.print((String)(menuBase->navigation.menuPosition[1] + 1) + 
-                    ". " + 
-                    menuBase->menuStrings.stringDomination[position]);
+                    ". ");//+ 
+                    //menuBase->menuStrings.stringDomination[position]);
         lcd.setCursor(0,1);
         switch (position)
         {
         case 0:
             printTime(&menuBase->gamemodeData.gamemodeDomination.gameTime, false);
+            lcd.setCursor(3,0);
+            lcd.print("CZAS GRY");
             break;
         case 1:
             printTime(&menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime, true);
+            lcd.setCursor(3,0);
+            lcd.print("P. PRZEJECIE");
             break;
         case 2:
             printTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true);
+            lcd.setCursor(3,0);
+            lcd.print("PRZEJECIE");
             break;
         case 3:
             printTime(&menuBase->gamemodeData.gamemodeDomination.pointTime, true);
+            lcd.setCursor(3,0);
+            lcd.print("PUNKT CO");
             break;
         case 4:
             printValueOption(&menuBase->gamemodeData.gamemodeDomination.winningPointsLimit, true); // TODO think about that, and about move it ot common
+            lcd.setCursor(3,0);
+            lcd.print("LIMIT PUNKOW");
             break;
         case 5:
             printBoolOption(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
+            lcd.setCursor(3,0);
+            lcd.print("PRZELACZNIK");
             break;
         case 6:
             printTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, false);
+            lcd.setCursor(3,0);
+            lcd.print("SYRENA");
+            break;
+        case 7:
+            lcd.setCursor(3,0);
+            lcd.print("START");
             break;
         default:
             break;
@@ -740,24 +785,27 @@ void validateStage1_1Position(menuBaseS* menuBase)
             setTime(&menuBase->gamemodeData.gamemodeBomb.gameTime, false);
             break;
         case 1:
-            setTime(&menuBase->gamemodeData.gamemodeBomb.armingTime, true);
+            setTime(&menuBase->gamemodeData.gamemodeBomb.explosionTime, true);
             break;
         case 2:
-            setTime(&menuBase->gamemodeData.gamemodeBomb.defusingTime, true);
+            setTime(&menuBase->gamemodeData.gamemodeBomb.armingTime, true);
             break;
         case 3:
-            setBoolean(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
+            setTime(&menuBase->gamemodeData.gamemodeBomb.defusingTime, true);
             break;
         case 4:
-            setBoolean(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
+            setBoolean(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
             break;
         case 5:
-            setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
+            setBoolean(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
             break;
         case 6:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
+            setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
             break;
         case 7:
+            setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
+            break;
+        case 8:
             startGame(menuBase);
             break;    
         default:
@@ -792,6 +840,10 @@ void validateStage1_2Position(menuBaseS* menuBase)
 {
     if(menuBase->navigation.menuStage == 2)
     {
+        if(menuBase->navigation.menuPosition[2] > STAGE_1_2_OPTIONS)
+        {
+            menuBase->navigation.menuPosition[2] = STAGE_1_2_OPTIONS;
+        } //TODO
         switch (menuBase->navigation.menuPosition[1])
         {
         case 0: // gameTime
@@ -930,7 +982,9 @@ void processMenu()
     bool isButtonPushed = false;
 
     //DEBUG
-    processBomb(&menuBase.gamemodeData.gamemodeBomb);
+    printGamemodeSettingsOnSerial(&menuBase.gamemodeData.gamemodeDomination);
+    processDomination(&menuBase.gamemodeData.gamemodeDomination);
+    //processBomb(&menuBase.gamemodeData.gamemodeBomb);
     //initializeMenu(&menuBase);
     //DEBUG
 
@@ -968,6 +1022,7 @@ void processMenu()
         {
             validateMenuPositionWrapper(&menuBase);
             printMenu(&menuBase);
+            printGamemodeSettingsOnSerial(&menuBase.gamemodeData.gamemodeDomination);
         }
         if(menuBase.navigation.freezeMenu)
         {
