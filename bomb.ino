@@ -60,7 +60,12 @@ void processBomb(const gamemodeBombS* const gm) {
   bool isAllowedToPushButtons = true;
   msTimeT pushingTime = 0;
   gamemodeTiming timing;
+
   initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker);
+
+  //MoveToGameData
+  msTimeT explosionTimeToSave = gm->explosionTime;
+  msTimeT endGameTimeToSave = timing.endgame;
 
   progressBarDataS progressBarData;
   bombInitializeProgressBarData(&progressBarData, gm);
@@ -117,6 +122,7 @@ void processBomb(const gamemodeBombS* const gm) {
               clearPiontsAndBombStatus= true;
               beep();
               isAllowedToPushButtons = false;
+              timing.endgame = timing.currentTime + explosionTimeToSave;
             }
             else
             {
@@ -141,6 +147,12 @@ void processBomb(const gamemodeBombS* const gm) {
                 lcd.clear();
                 lcd.setCursor(0, 0);
                 lcd.print("ROZBROJONO");
+              }
+              else
+              {
+                timing.endgame = endGameTimeToSave;
+                //if(resetczasuwybuchu)
+                explosionTimeToSave = timing.timeLeft;
               }
             }
             else

@@ -487,14 +487,14 @@ void printValueOption(const int* const value, bool spaceFill)
 *******************************************************************************/
 void setDefaultGamemodeBomb(gamemodeBombS* gm)
 {
-    gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 45 * SECONDS_IN_MS);
-    gm->explosionTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
-    gm->armingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
-    gm->defusingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
+    gm->gameTime = (0 * HOURS_IN_MS + 45 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
+    gm->explosionTime = (0 * HOURS_IN_MS + 20 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
+    gm->armingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);
+    gm->defusingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);
     gm->enableSwitch = true;
     gm->slowReversing = false;
     gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
-    gm->isDefuseEndGame = true;
+    gm->isDefuseEndGame = false;
 }
 
 /* > Function setDefaultGamemodeDomination
@@ -982,8 +982,8 @@ void processMenu()
     bool isButtonPushed = false;
 
     //DEBUG
-    printGamemodeSettingsOnSerial(&menuBase.gamemodeData.gamemodeDomination);
-    processDomination(&menuBase.gamemodeData.gamemodeDomination);
+    //printGamemodeSettingsOnSerial(&menuBase.gamemodeData.gamemodeDomination);
+    //processDomination(&menuBase.gamemodeData.gamemodeDomination);
     //processBomb(&menuBase.gamemodeData.gamemodeBomb);
     //initializeMenu(&menuBase);
     //DEBUG
