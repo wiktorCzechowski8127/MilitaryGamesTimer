@@ -38,24 +38,32 @@ struct gamemodeBombS
     bool enableSwitch;
     bool slowReversing;
     bool isDefuseEndGame;
+    bool explosionTimeReset;
 };
 
 struct bombDataS
 {
   msTimeWithSingT pointsInMs;
   msTimeT lastPushedButtonTimeStamp;
+  msTimeT timeToExplosion;
+  msTimeT endGameDefaultTime;
+  msTimeT armedTotalTime;
+  msTimeT unarmedTotalTime;
   uint8_t swithStatus : 1;
   uint8_t isButtonsPushed : 1;
   uint8_t currentBombStatus : 1;
-  uint8_t padding : 5;
+  uint8_t noBombStatus : 1;
+  uint8_t padding : 4;
 };
 
 /* > Functions ****************************************************************/
 
 void bombInitializeProgressBarData(progressBarDataS* data, const gamemodeBombS* const gm);
 void calculateFilledSquaresBomb(const gamemodeBombS* const gm, progressBarDataS* progressBarData, const bombDataS* const bombData);
+void calculateTotalTimes(gamemodeTiming* timing, bombDataS* bombData);
 
-void printBombStatus(bombDataS* const data, uint8_t printBombStatus = true);
+void printSummary(bombDataS* data);
+void printBombStatus(bombDataS* const data);
 void processBomb(const gamemodeBombS* const gm);
 
 void printBombGamemodeSettingsOnSerial(const gamemodeBombS* const gm); //DEBUG

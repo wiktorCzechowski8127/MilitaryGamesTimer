@@ -14,7 +14,7 @@
 
 #define AMMOUNT_OF_LCD_CHARS 14
 
-#define STAGE_1_1_OPTIONS 9
+#define STAGE_1_1_OPTIONS 10
 #define STAGE_1_2_OPTIONS 8
 
 #define BOMB_GAMEMODE 0

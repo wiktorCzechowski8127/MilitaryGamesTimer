@@ -4,19 +4,19 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
 {
   memset(timing, 0, sizeof(timing));
   timing->isGameRunning = true;
+  timing->currentTime = millis();
   if(*gametime == 0)
   {
     timing->isUnlimitedTime = true;
-    timing->endgame = millis();
+    timing->endgame = timing->currentTime;
   }
   else
   {
     timing->isUnlimitedTime = false;
-    timing->endgame = millis() + *gametime;
+    timing->endgame = timing->currentTime + *gametime;
   }
   timing->timeLeft = 0;
-  timing->currentTime = 0;
-  timing->lastCurrentTime = 0; //DEBUG
+  timing->lastCurrentTime = timing->currentTime; //DEBUG
   timing->alarmSpeakerEnd = *alarmSpeakerTime;
   //DEBUG 
   Serial.println("");
@@ -87,15 +87,15 @@ void verifyEndGame(gamemodeTiming* timing, uint8_t lcdpos1, uint8_t lcdpos2)
 
 void processGameSummary(gamemodeTiming* timing)
 {
-  delay(FREEZE_TIME);
-  uint8_t endButtonKeepPushed = false;
-  msTimeT pushingTime = 0;
-
   if(timing->turnSpeakerAlarmOn)
   {
     timing->alarmSpeakerEnd = timing->alarmSpeakerEnd + millis();
     digitalWrite(RELAY, true);
   }
+
+  delay(FREEZE_TIME);
+  uint8_t endButtonKeepPushed = false;
+  msTimeT pushingTime = 0;
 
   while (true)
   {
