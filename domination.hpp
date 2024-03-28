@@ -32,8 +32,6 @@ extern LiquidCrystal_I2C lcd;
 *******************************************************************************/
 struct dominationHistoryS
 {
-  uint8_t isFilled: 1;
-  uint8_t padding: 7;
   msTimeT gameTime;
   msTimeT runningTime;
   unsigned int leftTeamWinningPoints;
@@ -55,7 +53,7 @@ struct gamemodeDominationS
   unsigned int winningPointsLimit;
   bool enableSwitch;
   msTimeT alarmSpeaker;
-  dominationHistoryS history[3];
+  dominationHistoryS history[MAX_HISTORY_RECORDS];
 };
 
 struct dominationDataS
@@ -84,8 +82,14 @@ void calculateFilledSquares(const gamemodeDominationS* const gm, progressBarData
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm); //DEBUG
 
 bool calcWinningPointsAndCheckIsGameEnd(gamemodeTiming* timing, dominationDataS* data, gamemodeDominationS* gm);
+void saveResult(dominationHistoryS* const history, 
+                const msTimeT* const gameTime,
+                const msTimeT* const runningTime,
+                const unsigned int* const leftTeamWinningPoints, 
+                const unsigned int* const rightTeamWinningPoints);
 
-void processDomination(const gamemodeDominationS* const gm);
+void processDomination(gamemodeDominationS* const gm);
 
+void printDominationHisotry(const dominationHistoryS* const history);
 
 #endif

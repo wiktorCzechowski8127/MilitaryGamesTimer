@@ -172,7 +172,23 @@ void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm) {
   Serial.println("alarmSpeaker: " + (String)gm->alarmSpeaker);
 }
 
-void processDomination(const gamemodeDominationS* const gm)
+void saveResult(dominationHistoryS* const history, 
+                const msTimeT* const gameTime,
+                const msTimeT* const runningTime,
+                const unsigned int* const leftTeamWinningPoints, 
+                const unsigned int* const rightTeamWinningPoints)
+{
+  for(uint8_t i = MAX_HISTORY_RECORDS - 1; i > 0; i--)
+  {
+    memcpy(&history[i], &history[i - 1], sizeof(history[0]));
+  }
+  history[0].gameTime = *gameTime;
+  history[0].runningTime = *runningTime;
+  history[0].leftTeamWinningPoints = *leftTeamWinningPoints;
+  history[0].rightTeamWinningPoints = *rightTeamWinningPoints;
+}
+
+void processDomination(gamemodeDominationS* const gm)
 {
   // Initialization
   lcd.clear();
@@ -327,6 +343,61 @@ void processDomination(const gamemodeDominationS* const gm)
 
   // 5. Printing summary
   printSummary(&gm->gameTime, &timing.timeLeft, &data.leftTeamWinningPoints, &data.rightTeamWinningPoints);
+  saveResult(gm->history, &gm->gameTime, &timing.timeLeft, &data.leftTeamWinningPoints, &data.rightTeamWinningPoints);
   processGameSummary(&timing);
  
+}
+
+void printDominationHisotry(const dominationHistoryS* const history)
+{
+  bool isButtonPushed = true;
+  uint8_t historyRecord = 0;
+
+  while(true)
+  {
+    // Reading button status
+    if(buttonPushed(UP_BUTTON))
+    {
+      break;
+    }
+    if(buttonPushed(RIGHT_BUTTON))
+    {
+      isButtonPushed = true;
+
+      if (historyRecord == MAX_HISTORY_RECORDS - 1)
+      {
+        historyRecord = 0;
+      }
+      else
+      {
+        historyRecord++;
+      }
+    }
+    if(buttonPushed(LEFT_BUTTON))
+    {
+      isButtonPushed = true;
+
+      if (historyRecord == 0)
+      {
+        historyRecord = MAX_HISTORY_RECORDS - 1;
+      }
+      else
+      {
+        historyRecord--;
+      }
+    }
+
+    if(isButtonPushed)
+    {
+      printSummary(&history[historyRecord].gameTime, 
+                    &history[historyRecord].runningTime,
+                    &history[historyRecord].leftTeamWinningPoints,
+                    &history[historyRecord].rightTeamWinningPoints);
+
+      lcd.setCursor(LAST_LCD_CHAR, 0);
+      lcd.print(historyRecord + 1);
+      isButtonPushed = false;
+      Serial.println("OK");
+    }
+  }
 }

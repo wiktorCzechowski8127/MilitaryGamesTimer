@@ -27,6 +27,7 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
   Serial.println("lastCurrentTime: " + (String)timing->lastCurrentTime);
   Serial.println("alarmSpeakerEnd: " + (String)timing->alarmSpeakerEnd);
   Serial.println("isUnlimitedTime: " + (String)timing->isUnlimitedTime);
+  Serial.println("turnSpeakerAlarmOn: " + (String)timing->turnSpeakerAlarmOn);
 }
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
@@ -76,6 +77,7 @@ void verifyEndGame(gamemodeTiming* timing, uint8_t lcdpos1, uint8_t lcdpos2)
       if (timing->currentTime > (timing->buttonPushingTime + 2000)) 
       {
         timing->isGameRunning = false;
+        timing->turnSpeakerAlarmOn = false;
       }
     } 
     else

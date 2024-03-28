@@ -22,6 +22,19 @@ extern LiquidCrystal_I2C lcd;
 /* > Structures ***************************************************************/
 
 /*******************************************************************************
+ * struct: bombHistoryS
+ * 
+ * @brief Structure with history of games results .
+ * 
+*******************************************************************************/
+struct bombHistoryS
+{
+  msTimeT unarmedTotalTime;
+  msTimeT armedTotalTime;
+  uint8_t bombStatus;
+};
+
+/*******************************************************************************
  * struct: gamemodeBombS
  * 
  * @brief Bomb gamemode options. Ammount of options: 3
@@ -39,6 +52,7 @@ struct gamemodeBombS
     bool slowReversing;
     bool isDefuseEndGame;
     bool explosionTimeReset;
+    bombHistoryS history[MAX_HISTORY_RECORDS];
 };
 
 struct bombDataS
@@ -49,11 +63,11 @@ struct bombDataS
   msTimeT endGameDefaultTime;
   msTimeT armedTotalTime;
   msTimeT unarmedTotalTime;
-  uint8_t swithStatus : 1;
-  uint8_t isButtonsPushed : 1;
-  uint8_t currentBombStatus : 1;
-  uint8_t noBombStatus : 1;
-  uint8_t padding : 4;
+  uint8_t swithStatus: 1;
+  uint8_t isButtonsPushed: 1;
+  uint8_t currentBombStatus: 1;
+  uint8_t noBombStatus: 1;
+  uint8_t padding: 4;
 };
 
 /* > Functions ****************************************************************/
@@ -62,9 +76,19 @@ void bombInitializeProgressBarData(progressBarDataS* data, const gamemodeBombS* 
 void calculateFilledSquaresBomb(const gamemodeBombS* const gm, progressBarDataS* progressBarData, const bombDataS* const bombData);
 void calculateTotalTimes(gamemodeTiming* timing, bombDataS* bombData);
 
-void printSummary(bombDataS* data);
+void printSummary(const msTimeT* const unarmedTotalTime,
+                  const msTimeT* const armedTotalTime,
+                  uint8_t bombStatus);
+
 void printBombStatus(bombDataS* const data);
 void processBomb(const gamemodeBombS* const gm);
 
+void saveResult(bombHistoryS* const history, 
+                const msTimeT* const unarmedTotalTime,
+                const msTimeT* const armedTotalTime,
+                const uint8_t bombStatus);
+
 void printBombGamemodeSettingsOnSerial(const gamemodeBombS* const gm); //DEBUG
+
+void printBombHisotry(const bombHistoryS* const history);
 #endif

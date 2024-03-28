@@ -145,20 +145,20 @@ void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT timeLimit = UINT32
     isButtonPushed = false;
 
     // Reading button status
-    if(buttonPushed(RIGHT_BUTTON))
+    if(buttonPushed(UP_BUTTON))
     {
       Serial.println("up");
       isButtonPushed = true;
       isUpOrDownButtonPused = true;
       operand = 1;
     }
-    if(buttonPushed(LEFT_BUTTON))
+    if(buttonPushed(DOWN_BUTTON))
     {
       isButtonPushed = true;
       isUpOrDownButtonPused = true;
       operand = -1;
     }
-    if(buttonPushed(DOWN_BUTTON))
+    if(buttonPushed(RIGHT_BUTTON))
     {
       isButtonPushed = true;
       cursorPosition++;
@@ -167,7 +167,7 @@ void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT timeLimit = UINT32
         cursorPosition++;
       }
     }
-    if(buttonPushed(UP_BUTTON))
+    if(buttonPushed(LEFT_BUTTON))
     {
       isButtonPushed = true;
       cursorPosition--;
@@ -324,24 +324,24 @@ void setValue(int* valueToModify, int valueLimit)
     isButtonPushed = false;
 
     // Reading button status
-    if(buttonPushed(LEFT_BUTTON))
+    if(buttonPushed(UP_BUTTON))
     {
       isButtonPushed = true;
       isUpOrDownButtonPused = true;
       operand = 1;
     }
-    if(buttonPushed(RIGHT_BUTTON))
+    if(buttonPushed(DOWN_BUTTON))
     {
       isButtonPushed = true;
       isUpOrDownButtonPused = true;
       operand = -1;
     }
-    if(buttonPushed(DOWN_BUTTON))
+    if(buttonPushed(RIGHT_BUTTON))
     {
       isButtonPushed = true;
       cursorPosition++;
     }
-    if(buttonPushed(UP_BUTTON))
+    if(buttonPushed(LEFT_BUTTON))
     {
       isButtonPushed = true;
       cursorPosition--;
@@ -495,6 +495,10 @@ void setDefaultGamemodeBomb(gamemodeBombS* gm)
     gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
     gm->isDefuseEndGame = false;
     gm->explosionTimeReset = false;
+
+    memset(&gm->history, 
+           0,
+           sizeof(gm->history));
 }
 
 /* > Function setDefaultGamemodeDomination
@@ -515,6 +519,10 @@ void setDefaultGamemodeDomination(gamemodeDominationS* gm)
     gm->enableSwitch = false;
     gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
     gm->winningPointsLimit = 45;
+
+    memset(&gm->history, 
+           0,
+           sizeof(gm->history));
 }
 
 /* > Function initializeMenu
@@ -603,6 +611,10 @@ void printBombOptions(const menuBaseS* const menuBase)
             break;
         case 9:
             lcd.setCursor(3,0);
+            lcd.print("HISTORIA");
+            break;
+        case 10:
+            lcd.setCursor(3,0);
             lcd.print("START");
             break;
         default:
@@ -665,6 +677,10 @@ void printDominationOptions(const menuBaseS* const menuBase)
             lcd.print("SYRENA");
             break;
         case 7:
+            lcd.setCursor(3,0);
+            lcd.print("HISTORIA");
+            break;
+        case 8:
             lcd.setCursor(3,0);
             lcd.print("START");
             break;
@@ -778,7 +794,7 @@ void validateStage0Position(unsigned short* currentMenuPosition)
 *******************************************************************************/
 void validateStage1_1Position(menuBaseS* menuBase)
 {
-  gamemodeBombS gm = menuBase->gamemodeData.gamemodeBomb;
+  //gamemodeBombS gm = menuBase->gamemodeData.gamemodeBomb;
   if(menuBase->navigation.menuStage == 2)
   {
     if(menuBase->navigation.menuPosition[2] > STAGE_1_1_OPTIONS)
@@ -789,52 +805,57 @@ void validateStage1_1Position(menuBaseS* menuBase)
     switch (menuBase->navigation.menuPosition[1])
     {
       case 0:
-        setTime(&gm.gameTime, false);
+        setTime(&menuBase->gamemodeData.gamemodeBomb.gameTime, false);
 
-        if(gm.explosionTime > gm.gameTime) gm.explosionTime = gm.gameTime;
-        if(gm.armingTime > gm.gameTime) gm.armingTime = gm.gameTime;
-        if(gm.defusingTime > gm.gameTime) gm.defusingTime = gm.gameTime;
+        if(menuBase->gamemodeData.gamemodeBomb.explosionTime > menuBase->gamemodeData.gamemodeBomb.gameTime) menuBase->gamemodeData.gamemodeBomb.explosionTime = menuBase->gamemodeData.gamemodeBomb.gameTime;
+        if(menuBase->gamemodeData.gamemodeBomb.armingTime > menuBase->gamemodeData.gamemodeBomb.gameTime) menuBase->gamemodeData.gamemodeBomb.armingTime = menuBase->gamemodeData.gamemodeBomb.gameTime;
+        if(menuBase->gamemodeData.gamemodeBomb.defusingTime > menuBase->gamemodeData.gamemodeBomb.gameTime) menuBase->gamemodeData.gamemodeBomb.defusingTime = menuBase->gamemodeData.gamemodeBomb.gameTime;
 
         break;
       case 1:
 
-        setTime(&gm.explosionTime, true, gm.gameTime);
+        setTime(&menuBase->gamemodeData.gamemodeBomb.explosionTime, true, menuBase->gamemodeData.gamemodeBomb.gameTime);
         break;
 
       case 2:
 
-        setTime(&gm.armingTime, true);
-        if(gm.armingTime == 0) gm.armingTime = 10;
+        setTime(&menuBase->gamemodeData.gamemodeBomb.armingTime, true);
+        if(menuBase->gamemodeData.gamemodeBomb.armingTime == 0) menuBase->gamemodeData.gamemodeBomb.armingTime = 10;
         break;
 
       case 3:
 
-        setTime(&gm.defusingTime, true);
-        if(gm.defusingTime == 0) gm.defusingTime = 10;
+        setTime(&menuBase->gamemodeData.gamemodeBomb.defusingTime, true);
+        if(menuBase->gamemodeData.gamemodeBomb.defusingTime == 0) menuBase->gamemodeData.gamemodeBomb.defusingTime = 10;
         break;
 
       case 4:
-        setBoolean(&gm.enableSwitch);
+        setBoolean(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
         break;
       case 5:
-        setBoolean(&gm.isDefuseEndGame);
+        setBoolean(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
         break;
       case 6:
-        setBoolean(&gm.explosionTimeReset);
+        setBoolean(&menuBase->gamemodeData.gamemodeBomb.explosionTimeReset);
         break;
       case 7:
-        setBoolean(&gm.slowReversing);
+        setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
         break;
       case 8:
-        setTime(&gm.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
+        setTime(&menuBase->gamemodeData.gamemodeBomb.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
         break;
       case 9:
-        startGame(menuBase);
+        printBombHisotry(menuBase->gamemodeData.gamemodeBomb.history);
+        break;
+      case 10:
+        startGame(menuBase);;
         break;    
       default:
         break;
     }
-    menuBase->gamemodeData.gamemodeBomb = gm;
+    //memcpy(&menuBase->gamemodeData.gamemodeBomb, &gm, sizeof(gm));
+    //menuBase->gamemodeData.gamemodeBomb = gm;
+    Serial.println("PRN[0].unarmedTotalTime: " + (String)menuBase->gamemodeData.gamemodeBomb.history[0].unarmedTotalTime);
   }
   else
   {
@@ -929,7 +950,11 @@ void validateStage1_2Position(menuBaseS* menuBase)
             setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
             break;
         case 7:
+            printDominationHisotry(menuBase->gamemodeData.gamemodeDomination.history);
+            break;
+        case 8:
             startGame(menuBase);
+            break;
         default:
             break;
         }

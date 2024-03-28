@@ -45,29 +45,32 @@ void calculateTotalTimes(gamemodeTiming* timing, bombDataS* bombData)
   //Serial.println("TimeDiff: " + (String)timediff + " unarmedTotalTime: " + (String)bombData->unarmedTotalTime);
 }
 
-void printSummary(bombDataS* data)
+void printSummary(const msTimeT* const unarmedTotalTime,
+                  const msTimeT* const armedTotalTime,
+                  uint8_t bombStatus)
 {
   lcd.clear();
 
-  lcd.setCursor(0, 0);
+  lcd.setCursor(1, 0);
   lcd.print("R: ");
-  printTime(&data->unarmedTotalTime, false);
+  printTime(unarmedTotalTime, false);
 
-  lcd.setCursor(0, 1);
+  lcd.setCursor(1, 1);
   lcd.print("U: ");
-  printTime(&data->armedTotalTime, false);
+  printTime(armedTotalTime, false);
 
-  if(data->currentBombStatus == BOMB_UNARMED)
+  if(bombStatus == BOMB_UNARMED)
   {
-      lcd.setCursor(15, 0);
+      lcd.setCursor(0, 0);
   }
   else
   {
-      lcd.setCursor(15, 1);   
+      lcd.setCursor(0, 1);   
   }
-  lcd.write(byte(127));
-  Serial.println("UNARMED: " + (String)data->unarmedTotalTime);
-  Serial.println("UNARMED: " + (String)data->armedTotalTime);
+  lcd.write(byte(126));
+  //DEBUG
+  Serial.println("UNARMED: " + (String)*unarmedTotalTime);
+  Serial.println("ARMED: " + (String)*armedTotalTime);
 }
 
 void printBombStatus(bombDataS* const data)
@@ -88,6 +91,24 @@ void printBombStatus(bombDataS* const data)
       lcd.print("ROZ.");
     }
   }
+}
+
+void saveResult(bombHistoryS* const history, 
+                const msTimeT* const unarmedTotalTime,
+                const msTimeT* const armedTotalTime,
+                const uint8_t bombStatus)
+{
+  for(uint8_t i = MAX_HISTORY_RECORDS - 1; i > 0; i--)
+  {
+    memcpy(&history[i], &history[i - 1], sizeof(history[0]));
+  }
+  history[0].unarmedTotalTime = *unarmedTotalTime;
+  history[0].armedTotalTime = *armedTotalTime;
+  history[0].bombStatus = bombStatus;
+  //DEBUG
+  Serial.println("");
+  Serial.println("unarmedTotalTime: " + (String)*unarmedTotalTime);
+  Serial.println("history[0].unarmedTotalTime: " + (String)history[0].unarmedTotalTime);
 }
 
 void processBomb(const gamemodeBombS* const gm) {
@@ -285,7 +306,16 @@ void processBomb(const gamemodeBombS* const gm) {
     // TODO make functions of this part
     verifyEndGame(&timing, 8, 0);
   }
-  printSummary(&data);
+
+  saveResult(gm->history,
+             &data.unarmedTotalTime,
+             &data.armedTotalTime,
+             data.currentBombStatus);
+
+  printSummary(&data.unarmedTotalTime,
+               &data.armedTotalTime,
+               data.currentBombStatus);
+
   processGameSummary(&timing);
 }
 
@@ -300,4 +330,58 @@ void printBombGamemodeSettingsOnSerial(const gamemodeBombS* const gm)
   Serial.println("enableSwitch: " + (String)gm->enableSwitch);
   Serial.println("isDefuseEndGame: " + (String)gm->isDefuseEndGame);
   Serial.println("slowReversing: " + (String)gm->slowReversing);
+}
+
+void printBombHisotry(const bombHistoryS* const history)
+{
+  bool isButtonPushed = true;
+  uint8_t historyRecord = 0;
+  Serial.println("history[0].unarmedTotalTime: " + (String)history[0].unarmedTotalTime);
+  
+  while(true)
+  {
+    // Reading button status
+    if(buttonPushed(UP_BUTTON))
+    {
+      break;
+    }
+    if(buttonPushed(RIGHT_BUTTON))
+    {
+      isButtonPushed = true;
+
+      if (historyRecord == MAX_HISTORY_RECORDS - 1)
+      {
+        historyRecord = 0;
+      }
+      else
+      {
+        historyRecord++;
+      }
+    }
+    if(buttonPushed(LEFT_BUTTON))
+    {
+      isButtonPushed = true;
+
+      if (historyRecord == 0)
+      {
+        historyRecord = MAX_HISTORY_RECORDS - 1;
+      }
+      else
+      {
+        historyRecord--;
+      }
+    }
+
+    if(isButtonPushed)
+    {
+      printSummary(&history[historyRecord].unarmedTotalTime, 
+                   &history[historyRecord].armedTotalTime,
+                   history[historyRecord].bombStatus);
+
+      lcd.setCursor(LAST_LCD_CHAR, 0);
+      lcd.print(historyRecord + 1);
+      isButtonPushed = false;
+      Serial.println("OK");
+    }
+  }
 }
