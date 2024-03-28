@@ -23,6 +23,23 @@ extern LiquidCrystal_I2C lcd;
 
 /* > Structures ***************************************************************/
 
+
+/*******************************************************************************
+ * struct: gameHistoryS
+ * 
+ * @brief Structure with history of games results .
+ * 
+*******************************************************************************/
+struct dominationHistoryS
+{
+  uint8_t isFilled: 1;
+  uint8_t padding: 7;
+  msTimeT gameTime;
+  msTimeT runningTime;
+  unsigned int leftTeamWinningPoints;
+  unsigned int rightTeamWinningPoints;
+};
+
 /*******************************************************************************
  * struct: gamemodeDominationS
  * 
@@ -38,6 +55,7 @@ struct gamemodeDominationS
   unsigned int winningPointsLimit;
   bool enableSwitch;
   msTimeT alarmSpeaker;
+  dominationHistoryS history[3];
 };
 
 struct dominationDataS

@@ -10,7 +10,7 @@
 #define SECONDS_IN_MS (unsigned long)1000
 
 #define BEEP_TIME 10
-#define ALARM_SPEAKER_MAX_TIME 2 * MINUTES_IN_MS
+#define ALARM_SPEAKER_MAX_TIME 60 * MINUTES_IN_MS
 
 /* > Typedefs *****************************************************************/
 typedef long int msTimeWithSingT;

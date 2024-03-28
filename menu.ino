@@ -145,20 +145,20 @@ void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT timeLimit = UINT32
     isButtonPushed = false;
 
     // Reading button status
-    if(buttonPushed(UP_BUTTON))
+    if(buttonPushed(RIGHT_BUTTON))
     {
       Serial.println("up");
       isButtonPushed = true;
       isUpOrDownButtonPused = true;
       operand = 1;
     }
-    if(buttonPushed(DOWN_BUTTON))
+    if(buttonPushed(LEFT_BUTTON))
     {
       isButtonPushed = true;
       isUpOrDownButtonPused = true;
       operand = -1;
     }
-    if(buttonPushed(RIGHT_BUTTON))
+    if(buttonPushed(DOWN_BUTTON))
     {
       isButtonPushed = true;
       cursorPosition++;
@@ -167,7 +167,7 @@ void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT timeLimit = UINT32
         cursorPosition++;
       }
     }
-    if(buttonPushed(LEFT_BUTTON))
+    if(buttonPushed(UP_BUTTON))
     {
       isButtonPushed = true;
       cursorPosition--;
@@ -324,25 +324,24 @@ void setValue(int* valueToModify, int valueLimit)
     isButtonPushed = false;
 
     // Reading button status
-    if(buttonPushed(UP_BUTTON))
+    if(buttonPushed(LEFT_BUTTON))
     {
-      Serial.println("up");
       isButtonPushed = true;
       isUpOrDownButtonPused = true;
       operand = 1;
     }
-    if(buttonPushed(DOWN_BUTTON))
+    if(buttonPushed(RIGHT_BUTTON))
     {
       isButtonPushed = true;
       isUpOrDownButtonPused = true;
       operand = -1;
     }
-    if(buttonPushed(RIGHT_BUTTON))
+    if(buttonPushed(DOWN_BUTTON))
     {
       isButtonPushed = true;
       cursorPosition++;
     }
-    if(buttonPushed(LEFT_BUTTON))
+    if(buttonPushed(UP_BUTTON))
     {
       isButtonPushed = true;
       cursorPosition--;
@@ -779,59 +778,75 @@ void validateStage0Position(unsigned short* currentMenuPosition)
 *******************************************************************************/
 void validateStage1_1Position(menuBaseS* menuBase)
 {
-    if(menuBase->navigation.menuStage == 2)
+  gamemodeBombS gm = menuBase->gamemodeData.gamemodeBomb;
+  if(menuBase->navigation.menuStage == 2)
+  {
+    if(menuBase->navigation.menuPosition[2] > STAGE_1_1_OPTIONS)
     {
-        if(menuBase->navigation.menuPosition[2] > STAGE_1_1_OPTIONS)
-        {
-            menuBase->navigation.menuPosition[2] = STAGE_1_1_OPTIONS;
-        } //TODO
-        switch (menuBase->navigation.menuPosition[1])
-        {
-        case 0:
-            setTime(&menuBase->gamemodeData.gamemodeBomb.gameTime, false);
-            break;
-        case 1:
-            setTime(&menuBase->gamemodeData.gamemodeBomb.explosionTime, true, );
-            break;
-        case 2:
-            setTime(&menuBase->gamemodeData.gamemodeBomb.armingTime, true);
-            break;
-        case 3:
-            setTime(&menuBase->gamemodeData.gamemodeBomb.defusingTime, true);
-            break;
-        case 4:
-            setBoolean(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
-            break;
-        case 5:
-            setBoolean(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
-            break;
-        case 6:
-            setBoolean(&menuBase->gamemodeData.gamemodeBomb.explosionTimeReset);
-            break;
-        case 7:
-            setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
-            break;
-        case 8:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
-            break;
-        case 9:
-            startGame(menuBase);
-            break;    
-        default:
-            break;
-        }
-    }
-    else
+      menuBase->navigation.menuPosition[2] = STAGE_1_1_OPTIONS;
+    } //TODO
+
+    switch (menuBase->navigation.menuPosition[1])
     {
-        if (menuBase->navigation.menuPosition[1] == STAGE_1_1_OPTIONS)
-        {
-            menuBase->navigation.menuPosition[1] = 0;
-        }
-        else if (menuBase->navigation.menuPosition[1] == 65535) //TODO change this
-        {
-            menuBase->navigation.menuPosition[1] = STAGE_1_1_OPTIONS - 1;
-        }
+      case 0:
+        setTime(&gm.gameTime, false);
+
+        if(gm.explosionTime > gm.gameTime) gm.explosionTime = gm.gameTime;
+        if(gm.armingTime > gm.gameTime) gm.armingTime = gm.gameTime;
+        if(gm.defusingTime > gm.gameTime) gm.defusingTime = gm.gameTime;
+
+        break;
+      case 1:
+
+        setTime(&gm.explosionTime, true, gm.gameTime);
+        break;
+
+      case 2:
+
+        setTime(&gm.armingTime, true);
+        if(gm.armingTime == 0) gm.armingTime = 10;
+        break;
+
+      case 3:
+
+        setTime(&gm.defusingTime, true);
+        if(gm.defusingTime == 0) gm.defusingTime = 10;
+        break;
+
+      case 4:
+        setBoolean(&gm.enableSwitch);
+        break;
+      case 5:
+        setBoolean(&gm.isDefuseEndGame);
+        break;
+      case 6:
+        setBoolean(&gm.explosionTimeReset);
+        break;
+      case 7:
+        setBoolean(&gm.slowReversing);
+        break;
+      case 8:
+        setTime(&gm.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
+        break;
+      case 9:
+        startGame(menuBase);
+        break;    
+      default:
+        break;
     }
+    menuBase->gamemodeData.gamemodeBomb = gm;
+  }
+  else
+  {
+    if (menuBase->navigation.menuPosition[1] == STAGE_1_1_OPTIONS)
+    {
+        menuBase->navigation.menuPosition[1] = 0;
+    }
+    else if (menuBase->navigation.menuPosition[1] == 65535) //TODO change this
+    {
+        menuBase->navigation.menuPosition[1] = STAGE_1_1_OPTIONS - 1;
+    }
+  }
 }
 
 /* > Function validateStage1_2Position
@@ -872,7 +887,7 @@ void validateStage1_2Position(menuBaseS* menuBase)
         case 1: // fullTakeOverTime
             setTime(&menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime, true);
             // Zero case -> 1ms
-            (menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 1 : menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime;
+            (menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 8 : menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime;
             
             // takeOverTime > fullTakeOverTime
             if(menuBase->gamemodeData.gamemodeDomination.takeOverTime >
@@ -885,7 +900,7 @@ void validateStage1_2Position(menuBaseS* menuBase)
         case 2: // takeOverTime
             setTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true, menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime); // case with limit
             // Zero case -> 1ms
-            (menuBase->gamemodeData.gamemodeDomination.takeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 1 : menuBase->gamemodeData.gamemodeDomination.takeOverTime;
+            (menuBase->gamemodeData.gamemodeDomination.takeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 8 : menuBase->gamemodeData.gamemodeDomination.takeOverTime;
             break;
         case 3: // pointTime
             if(menuBase->gamemodeData.gamemodeDomination.gameTime == 0)

@@ -27,7 +27,8 @@ void printWinningPoints(const unsigned int* const leftTeamWinningPoints, const u
 void printSummary(const msTimeT* const gameTime,
                   const msTimeT* const runningTime,
                   const unsigned int* const leftTeamWinningPoints,
-                  const unsigned int* const rightTeamWinningPoints) {
+                  const unsigned int* const rightTeamWinningPoints)
+{
   // Printing passed Time
   msTimeT passedTime = (*gameTime != 0) ? *gameTime - *runningTime : *runningTime;
   lcd.clear();
@@ -81,7 +82,8 @@ void dominationInitializeProgressBarData(progressBarDataS* data, const gamemodeD
       data->takeOverStageSquares++;
     }
   } 
-  else {
+  else
+  {
     data->ammountOfStages = BAR_TYPE_TWO_TEAMS;
     data->takeOverStageSquares = AMMOUNT_OF_SQUARES_PER_TEAM;
   }
