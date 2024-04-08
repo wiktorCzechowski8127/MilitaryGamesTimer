@@ -20,6 +20,8 @@
 
 /* > Externs ******************************************************************/
 extern LiquidCrystal_I2C lcd;
+extern bool RELAY_ON;
+extern bool RELAY_OFF;
 
 /* > Structures ***************************************************************/
 

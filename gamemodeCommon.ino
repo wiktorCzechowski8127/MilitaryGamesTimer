@@ -92,7 +92,7 @@ void processGameSummary(gamemodeTiming* timing)
   if(timing->turnSpeakerAlarmOn)
   {
     timing->alarmSpeakerEnd = timing->alarmSpeakerEnd + millis();
-    digitalWrite(RELAY, true);
+    digitalWrite(RELAY, RELAY_ON);
   }
 
   delay(FREEZE_TIME);
@@ -118,7 +118,7 @@ void processGameSummary(gamemodeTiming* timing)
       {
         if (timing->turnSpeakerAlarmOn == true) 
         {
-          digitalWrite(RELAY, false);
+          digitalWrite(RELAY, RELAY_OFF);
           pushingTime = 0;
           timing->turnSpeakerAlarmOn = false;
           Serial.println("EXIT");
@@ -135,7 +135,7 @@ void processGameSummary(gamemodeTiming* timing)
     }
     if ((timing->currentTime > timing->alarmSpeakerEnd) && (timing->turnSpeakerAlarmOn == true))
     {
-      digitalWrite(RELAY, false);
+      digitalWrite(RELAY, RELAY_OFF);
       timing->alarmSpeakerEnd = 0;
       timing->turnSpeakerAlarmOn = false;
     }
