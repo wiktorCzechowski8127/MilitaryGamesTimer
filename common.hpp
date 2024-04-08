@@ -12,6 +12,10 @@
 #define BEEP_TIME 10
 #define ALARM_SPEAKER_MAX_TIME 60 * MINUTES_IN_MS
 
+#define FIRST_LCD_CHAR 0
+#define LAST_LCD_CHAR 15
+#define LCD_MIDDLE_LEFT 7
+#define LCD_MIDDLE_RIGHT 8
 /* > Typedefs *****************************************************************/
 typedef long int msTimeWithSingT;
 typedef unsigned long msTimeT;

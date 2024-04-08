@@ -512,7 +512,7 @@ void setDefaultGamemodeBomb(gamemodeBombS* gm)
 *******************************************************************************/
 void setDefaultGamemodeDomination(gamemodeDominationS* gm)
 {
-    gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 5 * SECONDS_IN_MS);
+    gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
     gm->fullTakeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
     gm->takeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 2 * SECONDS_IN_MS);
     gm->pointTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);

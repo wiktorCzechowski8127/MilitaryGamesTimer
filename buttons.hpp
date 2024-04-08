@@ -2,7 +2,7 @@
 #define BUTTONS_H
 
 /* > Include  *****************************************************************/
-
+#include "bar.hpp"
 /* > Defines ******************************************************************/
 #define COOLDOWN 20
 
@@ -17,6 +17,9 @@
 #define LEFT_BUTTON 9
 #define UP_BUTTON 10
 #define DOWN_BUTTON 11
+
+#define RED_LED 12
+#define BLUE_LED 13
 
 /* > Externs ******************************************************************/
 
@@ -39,5 +42,6 @@ bool buttonPushed(unsigned short pin)
     }
     return false;
 }
+
 
 #endif

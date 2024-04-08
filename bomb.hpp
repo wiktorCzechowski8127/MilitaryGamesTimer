@@ -6,8 +6,9 @@
 #include <LiquidCrystal_I2C.h>
 #include "common.hpp"
 #include "gamemodeCommon.hpp"
-#include "lcd.hpp"
 #include "buttons.hpp"
+#include "bar.hpp"
+#include "led.hpp"
 
 /* > Defines ******************************************************************/
 #define BOMB_UNARMED 0
@@ -72,13 +73,13 @@ struct bombDataS
 
 /* > Functions ****************************************************************/
 
-void bombInitializeProgressBarData(progressBarDataS* data, const gamemodeBombS* const gm);
-void calculateFilledSquaresBomb(const gamemodeBombS* const gm, progressBarDataS* progressBarData, const bombDataS* const bombData);
 void calculateTotalTimes(gamemodeTiming* timing, bombDataS* bombData);
 
 void printSummary(const msTimeT* const unarmedTotalTime,
                   const msTimeT* const armedTotalTime,
-                  uint8_t bombStatus);
+                  uint8_t bombStatus,
+                  ledC* armedLed,
+                  ledC* defusedLed);
 
 void printBombStatus(bombDataS* const data);
 void processBomb(const gamemodeBombS* const gm);

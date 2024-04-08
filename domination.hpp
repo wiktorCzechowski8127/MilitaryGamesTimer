@@ -6,8 +6,8 @@
 #include <LiquidCrystal_I2C.h>
 #include "common.hpp"
 #include "gamemodeCommon.hpp"
-#include "lcd.hpp"
 #include "buttons.hpp"
+#include "led.hpp"
 
 /* > Defines ******************************************************************/
 
@@ -77,8 +77,6 @@ void printSummary(const msTimeT* const gameTime, const msTimeT* const runningTim
 
 void clearButtonsStatus(dominationDataS* data);
 bool validateWinningPoints(const unsigned int* const points, const unsigned int* const limit, msTimeT* alarmSpeakerEnd);
-void dominationInitializeProgressBarData(progressBarDataS* data, const gamemodeDominationS* const gm);
-void calculateFilledSquares(const gamemodeDominationS* const gm, progressBarDataS* progressBarData, const long int* const pointsInMs, gamemodeTiming* timing);
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm); //DEBUG
 
 bool calcWinningPointsAndCheckIsGameEnd(gamemodeTiming* timing, dominationDataS* data, gamemodeDominationS* gm);
