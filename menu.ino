@@ -597,7 +597,7 @@ void printBombOptions(const menuBaseS* const menuBase)
         case 6:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.explosionTimeReset);
             lcd.setCursor(3,0);
-            lcd.print("RST.EXP.TIME");
+            lcd.print("RES.CZAS.EKS");
             break;
         case 7:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
