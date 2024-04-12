@@ -7,7 +7,8 @@
 #include "common.hpp"
 #include "domination.hpp"
 #include "bomb.hpp"
-#include "buttons.hpp"
+#include "gpio.hpp"
+#include <stdint.h>
 
 /* > Defines ******************************************************************/
 #define AMMOUNT_OF_GAMEMODES 2
@@ -38,7 +39,6 @@
 #define BOOL_OPTION_CURSOR_POS 4
 #define UINT_OPTION_CURSOR_POS 2
 
-#define FREEZE_TIME 1000
 
 /* > Typedefs *****************************************************************/
 

@@ -94,31 +94,6 @@ void progressBarBaseC::createProgressBarCharacters()
   _lcd->createChar(CHAR_TWO_STRIPS_FILLED, twoStripsFilled);
 }
 
-
-/*******************************************************************************
- * Function: printBaseClass
- * 
- * @brief DEBUG FUNCTION - Printing on serial progressBarBaseC variables.
- * 
-*******************************************************************************/
-void progressBarBaseC::printBaseClass()
-{
-  Serial.println();
-  Serial.println("BAR BASE CLASS");
-  Serial.println("size:" + (String)_size);
-  Serial.println("xPos:" + (String)_xPos);
-  Serial.println("yPos:" + (String)_yPos);
-  Serial.print("progressBarLayout: ");
-  for (int i = 0; i < _size; i++)
-  {
-    if(_progressBarLayout[i] < 8)
-    {
-      Serial.print(_progressBarLayout[i]);
-    }
-  }
-  Serial.println("");
-}
-
 /*******************************************************************************
  * Function: printProgressBarOnLcd
  * 
@@ -153,31 +128,6 @@ void progressBarBaseC::changeBarPosition(uint8_t xPos, uint8_t yPos)
 /* > classicProgressBarC ***************************************************************/
 
 /* > public ***************************************************************/
-/*******************************************************************************
- * Function: printProgressBar
- * 
- * @brief DEBUG FUNCTION - Printing on serial classic progress bar and basic 
- *        variables.
- * 
-*******************************************************************************/
-void classicProgressBarC::printProgressBar(unsigned long value)
-{
-  
-  Serial.print(value);
-  Serial.print(" / ");
-  Serial.print(_maxValue);
-  Serial.print(": ");
-  uint8_t modifier = 0;
-  for (int i = 0; i < _size; i++)
-  {  
-    modifier = (_layoutMask >> i) & 0x01;
-    Serial.print(_progressBarLayout[i] + modifier);
-  }
-  Serial.print(" -- ");
-  Serial.print(_progress);
-  Serial.println("");
-}
-
 /*******************************************************************************
  * Function: calculateProgressAndPrintIfDifferent
  * 
@@ -312,6 +262,11 @@ void twoDeviationProgressBarC::calculateProgressAndPrintIfDifferent(long value, 
 {
 
   bool filledSite = (value > 0) ? 1 : 0;
+  if (_lastFilledSite != filledSite)
+  {
+    _lastFilledSite = filledSite;
+    forcePrint = true;
+  }
   value = abs(value);
 
   uint8_t newProgress = 0;

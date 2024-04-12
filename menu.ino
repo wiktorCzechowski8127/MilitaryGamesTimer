@@ -21,7 +21,7 @@ void startGame(menuBaseS* menuBase)
     startButtonKeepPushed = false;
     if(buttonPushed(UP_BUTTON))
     {
-      Serial.println("up");
+      //Serial.println("up");
       break;
     }
     if(digitalRead(DOWN_BUTTON) == 0)
@@ -43,7 +43,6 @@ void startGame(menuBaseS* menuBase)
         }
         else if(menuBase->navigation.menuPosition[0] == DOMINATION_GAMEMODE)
         {
-          Serial.println("SRFAF");
           //printGamemodeSettingsOnSerial(&menuBase->gamemodeData.gamemodeDomination);
           processDomination(&menuBase->gamemodeData.gamemodeDomination);
         }     
@@ -147,7 +146,6 @@ void setTime(msTimeT* timeToModify, bool minutesOnly, msTimeT timeLimit = UINT32
     // Reading button status
     if(buttonPushed(UP_BUTTON))
     {
-      Serial.println("up");
       isButtonPushed = true;
       isUpOrDownButtonPused = true;
       operand = 1;
@@ -272,16 +270,12 @@ void setBoolean(bool* option)
         }
         if(buttonPushed(RIGHT_BUTTON))
         {
-            *option = !*option;
-            Serial.println("right  ");
-            Serial.print(*option);  
+            *option = !*option; 
             printBoolOption(option);
         }
         if(buttonPushed(LEFT_BUTTON))
         {
-            Serial.print("left  ");
-            *option = !*option;
-            Serial.print(*option);  
+            *option = !*option; 
             printBoolOption(option);
         }
     }
@@ -299,10 +293,7 @@ void setBoolean(bool* option)
 *******************************************************************************/
 void setValue(int* valueToModify, int valueLimit)
 {
-
-
   unsigned short cursorPosition = 2;
-  unsigned short monthOnlyPositionTreshold = 0;
 
   bool isButtonPushed = false;
   bool isUpOrDownButtonPused = false;
@@ -352,28 +343,35 @@ void setValue(int* valueToModify, int valueLimit)
       // Proceding up/down buttons
       if(isUpOrDownButtonPused)
       {
-        Serial.println(cursorPosition);
+        //Serial.println(cursorPosition);
         switch (cursorPosition)
         {
         case 2:
-          *valueToModify += (10000 * operand);
-          Serial.println("1: "+ (String)*valueToModify); 
+          if(*valueToModify > (INT16_MAX - 10000) && (operand == 1))
+          {
+            *valueToModify = INT16_MAX;
+          }
+          else
+          {
+            *valueToModify += (10000 * operand);
+          }
+          //Serial.println("1: "+ (String)*valueToModify); 
           break;
         case 3:
           *valueToModify += (1000 * operand);
-          Serial.println("2: "+ (String)*valueToModify); 
+          //Serial.println("2: "+ (String)*valueToModify); 
           break;
         case 4:
           *valueToModify += (100 * operand);
-          Serial.println("3: "+ (String)*valueToModify); 
+          //Serial.println("3: "+ (String)*valueToModify); 
           break;
         case 5:
           *valueToModify += (10 * operand);
-          Serial.println("4: "+ (String)*valueToModify); 
+          //Serial.println("4: "+ (String)*valueToModify); 
           break;
         case 6:
           *valueToModify += (1 * operand);
-          Serial.println("5: "+ (String)*valueToModify); 
+          //Serial.println("5: "+ (String)*valueToModify); 
           break;
         default:
           break;
@@ -382,12 +380,12 @@ void setValue(int* valueToModify, int valueLimit)
         if(*valueToModify > valueLimit)
         {
           *valueToModify = valueLimit;
-          Serial.println("limit"); 
+          //Serial.println("limit"); 
         }
         else if(*valueToModify < 0)
         {
           *valueToModify = 0;
-          Serial.println("zero"); 
+          //Serial.println("zero"); 
         }
         //Serial.println(*valueToModify); 
       }
@@ -462,7 +460,7 @@ void printBoolOption(const bool* const option)
 *******************************************************************************/
 void printValueOption(const int* const value, bool spaceFill)
 {
-    lcd.setCursor(UINT_OPTION_CURSOR_POS,1); // TODO change this and desc
+    lcd.setCursor(UINT_OPTION_CURSOR_POS, 1); // TODO change this and desc
     char valueToPrint[10] = "";
     if(spaceFill)
     {
@@ -855,7 +853,6 @@ void validateStage1_1Position(menuBaseS* menuBase)
     }
     //memcpy(&menuBase->gamemodeData.gamemodeBomb, &gm, sizeof(gm));
     //menuBase->gamemodeData.gamemodeBomb = gm;
-    Serial.println("PRN[0].unarmedTotalTime: " + (String)menuBase->gamemodeData.gamemodeBomb.history[0].unarmedTotalTime);
   }
   else
   {
@@ -907,9 +904,11 @@ void validateStage1_2Position(menuBaseS* menuBase)
             break;
         case 1: // fullTakeOverTime
             setTime(&menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime, true);
-            // Zero case -> 1ms
-            (menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 8 : menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime;
-            
+            if(menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime == 0)
+            {
+              menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 8;
+            }
+       
             // takeOverTime > fullTakeOverTime
             if(menuBase->gamemodeData.gamemodeDomination.takeOverTime >
                menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime)
@@ -920,8 +919,10 @@ void validateStage1_2Position(menuBaseS* menuBase)
             break;
         case 2: // takeOverTime
             setTime(&menuBase->gamemodeData.gamemodeDomination.takeOverTime, true, menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime); // case with limit
-            // Zero case -> 1ms
-            (menuBase->gamemodeData.gamemodeDomination.takeOverTime == 0) ? menuBase->gamemodeData.gamemodeDomination.fullTakeOverTime = 8 : menuBase->gamemodeData.gamemodeDomination.takeOverTime;
+            if(menuBase->gamemodeData.gamemodeDomination.takeOverTime == 0)
+            {
+              menuBase->gamemodeData.gamemodeDomination.takeOverTime = 8;
+            }
             break;
         case 3: // pointTime
             if(menuBase->gamemodeData.gamemodeDomination.gameTime == 0)
@@ -1043,26 +1044,26 @@ void processMenu()
 
         if (buttonPushed(RIGHT_BUTTON))
         {
-            Serial.println("right");
+            //Serial.println("right");
             isButtonPushed = true;
             menuBase.navigation.menuPosition[menuBase.navigation.menuStage]++;
         }
         if (buttonPushed(LEFT_BUTTON))
         {
-            Serial.println("left");
+            //Serial.println("left");
             isButtonPushed = true;
             menuBase.navigation.menuPosition[menuBase.navigation.menuStage]--;
         }
         if (buttonPushed(DOWN_BUTTON))
         {
-            Serial.println("down");
+            //Serial.println("down");
             isButtonPushed = true;
             menuBase.navigation.menuStage++;
             //menuBase.navigation.menuPosition[menuBase.navigation.menuStage] = 0;
         }
         if (buttonPushed(UP_BUTTON))
         {
-            Serial.println("up");
+            //Serial.println("up");
             isButtonPushed = true;
             menuBase.navigation.menuStage--;
         }
@@ -1075,8 +1076,7 @@ void processMenu()
         }
         if(menuBase.navigation.freezeMenu)
         {
-          Serial.println("FREEZE");
-          delay(FREEZE_TIME);
+          waitUntilButtonReleased();
           menuBase.navigation.freezeMenu = false;
         }
     }

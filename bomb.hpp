@@ -6,7 +6,7 @@
 #include <LiquidCrystal_I2C.h>
 #include "common.hpp"
 #include "gamemodeCommon.hpp"
-#include "buttons.hpp"
+#include "gpio.hpp"
 #include "bar.hpp"
 #include "led.hpp"
 
@@ -85,9 +85,6 @@ void changeBombStatus(const gamemodeBombS* const gm,
                       gamemodeTiming* timing);
 
 void printBombStatus(bombDataS* const data);
-
-void printProgressBar(classicProgressBarC* armingPG,
-                      classicProgressBarC* defusingPG);
 
 void printSummary(const msTimeT* const unarmedTotalTime,
                   const msTimeT* const armedTotalTime,

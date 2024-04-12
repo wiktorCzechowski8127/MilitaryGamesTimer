@@ -50,8 +50,6 @@ class progressBarBaseC
       _layoutMask = 0;
       createProgressBarCharacters();
     }
-
-    void printBaseClass();
   //public:
 
   private:
@@ -99,7 +97,6 @@ class classicProgressBarC: private progressBarBaseC
       _maxValue = maxValue;
       _scaleFactor = _maxValue / _size;
       generateProgressBarLayout();
-      printBaseClass();
       printClassicProgressBarData();
     }
 
@@ -107,12 +104,6 @@ class classicProgressBarC: private progressBarBaseC
     /* > Variables ***************************************************************/
 
     /* > Functions ***************************************************************/
-    /**
-    * classicProgressBarC: printProgressBar
-    * @brief Function prints progres bar on lcd.
-    **/ 
-    void printProgressBar(unsigned long value);
-
     /**
     * classicProgressBarC: calculateProgressAndPrintIfDifferent
     * @brief Function calculate progress and prints progress bar is its needed
@@ -162,8 +153,8 @@ class twoDeviationProgressBarC: private progressBarBaseC
     {
       _maxValue = maxValue;
       _specialValue = specialValue;
+      _lastFilledSite = 0;
       generateProgressBarLayout();
-      progressBarBaseC::printBaseClass();
     }
 
     void calculateProgressAndPrintIfDifferent(long value, uint8_t forcePrint = false);
@@ -173,6 +164,7 @@ class twoDeviationProgressBarC: private progressBarBaseC
     long _maxValue;
     long _specialValue;
     uint8_t _specialValuePlace;
+    uint8_t _lastFilledSite;
 
     unsigned long _maxValueScaleFactor;
     unsigned long _specialValueScaleFactor;

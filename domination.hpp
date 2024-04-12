@@ -6,7 +6,7 @@
 #include <LiquidCrystal_I2C.h>
 #include "common.hpp"
 #include "gamemodeCommon.hpp"
-#include "buttons.hpp"
+#include "gpio.hpp"
 #include "led.hpp"
 
 /* > Defines ******************************************************************/
@@ -15,6 +15,10 @@
 #define POINTING_LEFT_TEAM 1
 #define POINTING_RIGHT_TEAM 2
 #define WINNING_POINTS_OUT_OF_RANGE "9+9"
+#define LEFT_BUTTOM_INDICATOR 3
+#define RIGHT_BUTTOM_INDICATOR 12
+#define RED_LED 12
+#define BLUE_LED 13
 
 /* > Typedefs *****************************************************************/
 
@@ -74,14 +78,40 @@ struct dominationDataS
 };
 
 /* > Functions ****************************************************************/
-void printWinningPoints(const unsigned int* const leftTeamWinningPoints, const unsigned int* const rightTeamWinningPoints, bool printOnLowerPart);
-void printSummary(const msTimeT* const gameTime, const msTimeT* const runningTime ,const unsigned int* const leftTeamWinningPoints, const unsigned int* const rightTeamWinningPoints);
+void printWinningPoints(const unsigned int* const leftTeamWinningPoints, 
+                        const unsigned int* const rightTeamWinningPoints,
+                        bool printOnLowerPart);
+
+void printSummary(const msTimeT* const gameTime, 
+                  const msTimeT* const runningTime,
+                  const unsigned int* const leftTeamWinningPoints, 
+                  const unsigned int* const rightTeamWinningPoints);
 
 void clearButtonsStatus(dominationDataS* data);
-bool validateWinningPoints(const unsigned int* const points, const unsigned int* const limit, msTimeT* alarmSpeakerEnd);
+
+bool validateWinningPoints(const unsigned int* const points, 
+                           const unsigned int* const limit, 
+                           msTimeT* alarmSpeakerEnd);
+
 void printGamemodeSettingsOnSerial(const gamemodeDominationS* const gm); //DEBUG
 
-bool calcWinningPointsAndCheckIsGameEnd(gamemodeTiming* timing, dominationDataS* data, gamemodeDominationS* gm);
+void setPointingTeam(const gamemodeDominationS* const gm, 
+                     dominationDataS* data, 
+                     msTimeT currentTime, 
+                     uint8_t pointingTeam);
+
+void setNonePointingTeam(dominationDataS* data, ledC* led);
+
+void ledBlink(const gamemodeDominationS* const gm,
+              const dominationDataS* const data, 
+              msTimeT currentTime,
+              ledC* leftLed,
+              ledC* rightLed);
+
+bool calcWinningPointsAndCheckIsGameEnd(gamemodeTiming* timing, 
+                                        dominationDataS* data,
+                                        gamemodeDominationS* gm);
+
 void saveResult(dominationHistoryS* const history, 
                 const msTimeT* const gameTime,
                 const msTimeT* const runningTime,

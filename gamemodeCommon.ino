@@ -18,7 +18,8 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
   timing->timeLeft = 0;
   timing->lastCurrentTime = timing->currentTime; //DEBUG
   timing->alarmSpeakerEnd = *alarmSpeakerTime;
-  //DEBUG 
+  //DEBUG
+  /*
   Serial.println("");
   Serial.println("GAMEMODE");    
   Serial.println("endgame: " + (String)timing->endgame);
@@ -27,7 +28,8 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
   Serial.println("lastCurrentTime: " + (String)timing->lastCurrentTime);
   Serial.println("alarmSpeakerEnd: " + (String)timing->alarmSpeakerEnd);
   Serial.println("isUnlimitedTime: " + (String)timing->isUnlimitedTime);
-  Serial.println("turnSpeakerAlarmOn: " + (String)timing->turnSpeakerAlarmOn);
+  Serial.println("turnSpeakerAlarmOn: " + (String)timing->turnSpeakerAlarmOn);\
+  */
 }
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
@@ -95,7 +97,7 @@ void processGameSummary(gamemodeTiming* timing)
     digitalWrite(RELAY, RELAY_ON);
   }
 
-  delay(FREEZE_TIME);
+  waitUntilButtonReleased();
   uint8_t endButtonKeepPushed = false;
   msTimeT pushingTime = 0;
 
@@ -121,7 +123,7 @@ void processGameSummary(gamemodeTiming* timing)
           digitalWrite(RELAY, RELAY_OFF);
           pushingTime = 0;
           timing->turnSpeakerAlarmOn = false;
-          Serial.println("EXIT");
+          waitUntilButtonReleased();
         } 
         else
         {

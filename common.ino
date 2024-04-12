@@ -1,5 +1,17 @@
 #include "common.hpp"
 
+
+void waitUntilButtonReleased()
+{
+  while(true)
+  {
+    if (digitalRead(LEFT_BUTTON) && digitalRead(RIGHT_BUTTON))
+    {
+      break;
+    }
+  }
+}
+
 /* > Function convertMsTo3var
 *******************************************************************************/
 /**

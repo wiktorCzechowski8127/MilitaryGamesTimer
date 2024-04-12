@@ -223,7 +223,7 @@ void processBomb(const gamemodeBombS* const gm)
   //Main loop
   while (timing.isGameRunning) 
   {
-    // 1. Calculating time
+    // Calculating time
     timing.lastCurrentTime = timing.currentTime;
     timing.currentTime = millis();
     calculateTotalTimes(&timing, &data);

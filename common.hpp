@@ -27,6 +27,8 @@ extern LiquidCrystal_I2C lcd;
 /* > Structures ***************************************************************/
 
 /* > Functions ****************************************************************/
+void waitUntilButtonReleased();
+
 void convertMsTo3var(const msTimeT* const timeInMs,
                      humanTimeT* hours,
                      humanTimeT* minutes,
