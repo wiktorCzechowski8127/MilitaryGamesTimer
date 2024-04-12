@@ -74,8 +74,15 @@ struct bombDataS
 };
 
 /* > Functions ****************************************************************/
+void initializeData(bombDataS* data, 
+                    const gamemodeBombS* const gm, 
+                    const gamemodeTiming* const timing);
 
 void calculateTotalTimes(gamemodeTiming* timing, bombDataS* bombData);
+
+void changeBombStatus(const gamemodeBombS* const gm,
+                      bombDataS* bombData, 
+                      gamemodeTiming* timing);
 
 void printBombStatus(bombDataS* const data);
 

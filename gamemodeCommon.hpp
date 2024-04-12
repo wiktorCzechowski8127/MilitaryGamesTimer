@@ -29,7 +29,7 @@ struct gamemodeTiming
   msTimeT endgame;
   msTimeT timeLeft;
   msTimeT currentTime;
-  msTimeT lastCurrentTime; //DEBUG
+  msTimeT lastCurrentTime;
   msTimeT alarmSpeakerEnd;
   msTimeT buttonPushingTime;
   uint8_t isGameRunning: 1;
