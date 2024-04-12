@@ -132,23 +132,24 @@ void processDomination(gamemodeDominationS* const gm)
 {
   // Initialization
   lcd.clear();
+
   gamemodeTiming timing;
   initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker);
 
   dominationDataS data;
   memset(&data, 0, sizeof(data));
 
-  //DEBUG
-  printGamemodeSettingsOnSerial(gm);
-
+  twoDeviationProgressBarC progressBar(&lcd, gm->fullTakeOverTime, gm->takeOverTime, 1);
+  progressBar.calculateProgressAndPrintIfDifferent(data.pointsInMs, FORCE_PRINTING);
+  ledC leftLed(12, BLINK_TIME);
+  ledC rightLed(13, BLINK_TIME);
+  
   // LCD prints
   printWinningPoints(&data.leftTeamWinningPoints, &data.rightTeamWinningPoints, false);
 
+  //DEBUG
+  printGamemodeSettingsOnSerial(gm);
 
-  twoDeviationProgressBarC PG(&lcd, gm->fullTakeOverTime, gm->takeOverTime, 1);
-  PG.calculateProgressAndPrintIfDifferent(data.pointsInMs, FORCE_PRINTING);
-  ledC leftLed(12, 500);
-  ledC rightLed(13, 500);
   // Main game loop
   while (timing.isGameRunning) 
   {
@@ -206,7 +207,7 @@ void processDomination(gamemodeDominationS* const gm)
               Serial.println("BEEP" + (String)timing.currentTime);
             }
           }
-          PG.calculateProgressAndPrintIfDifferent(data.pointsInMs);
+          progressBar.calculateProgressAndPrintIfDifferent(data.pointsInMs);
         }
         else  //first button push
         {
@@ -254,7 +255,7 @@ void processDomination(gamemodeDominationS* const gm)
           }
           // 3. LCD prints
           //printWinningPoints(&data.leftTeamWinningPoints, &data.rightTeamWinningPoints, false);
-          PG.calculateProgressAndPrintIfDifferent(data.pointsInMs);
+          progressBar.calculateProgressAndPrintIfDifferent(data.pointsInMs);
         } 
         else  //first button push
         {

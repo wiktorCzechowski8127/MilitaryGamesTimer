@@ -70,7 +70,7 @@ struct dominationDataS
   byte isLeftTeamWinning:1;
   byte pointingTeam:2; // 0 - None, 1 - left, 2 - right
   byte swithStatus:1;
-  byte padding:4;
+  byte padding:2;
 };
 
 /* > Functions ****************************************************************/

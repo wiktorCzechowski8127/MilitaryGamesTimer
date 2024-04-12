@@ -68,12 +68,19 @@ struct bombDataS
   uint8_t isButtonsPushed: 1;
   uint8_t currentBombStatus: 1;
   uint8_t noBombStatus: 1;
-  uint8_t padding: 4;
+  uint8_t clearPiontsAndLcd: 1;
+  uint8_t isAllowedToPushButtons: 1;
+  uint8_t padding: 2;
 };
 
 /* > Functions ****************************************************************/
 
 void calculateTotalTimes(gamemodeTiming* timing, bombDataS* bombData);
+
+void printBombStatus(bombDataS* const data);
+
+void printProgressBar(classicProgressBarC* armingPG,
+                      classicProgressBarC* defusingPG);
 
 void printSummary(const msTimeT* const unarmedTotalTime,
                   const msTimeT* const armedTotalTime,
@@ -81,8 +88,13 @@ void printSummary(const msTimeT* const unarmedTotalTime,
                   ledC* armedLed,
                   ledC* defusedLed);
 
-void printBombStatus(bombDataS* const data);
-void processBomb(const gamemodeBombS* const gm);
+void processNoButtonPush(bombDataS* data, ledC* armedLed, ledC* defusedLed,  msTimeT currentTime);
+
+void processClearingPoints(const gamemodeBombS* const gm, 
+                           bombDataS* const data,
+                           gamemodeTiming* timing,
+                           classicProgressBarC* armingPG,
+                           classicProgressBarC* defusingPG);
 
 void saveResult(bombHistoryS* const history, 
                 const msTimeT* const unarmedTotalTime,
@@ -90,6 +102,8 @@ void saveResult(bombHistoryS* const history,
                 const uint8_t bombStatus);
 
 void printBombGamemodeSettingsOnSerial(const gamemodeBombS* const gm); //DEBUG
+
+void processBomb(const gamemodeBombS* const gm);
 
 void printBombHisotry(const bombHistoryS* const history);
 #endif

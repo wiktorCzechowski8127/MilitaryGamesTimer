@@ -1,6 +1,5 @@
 #include "bomb.hpp"
 
-
 void calculateTotalTimes(gamemodeTiming* timing, bombDataS* bombData)
 {
   msTimeT timediff = timing->currentTime - timing->lastCurrentTime;
@@ -12,7 +11,7 @@ void calculateTotalTimes(gamemodeTiming* timing, bombDataS* bombData)
   {
     bombData->unarmedTotalTime += timediff;
   }
-  //Serial.println("TimeDiff: " + (String)timediff + " unarmedTotalTime: " + (String)bombData->unarmedTotalTime);
+  //Serial.println("TimeDiff: " + (String)timediff + " unarmedTotalTime: " + (String)bombData->unarmedTotalTime); //DEBUG
 }
 
 void printSummary(const msTimeT* const unarmedTotalTime,
@@ -46,8 +45,8 @@ void printSummary(const msTimeT* const unarmedTotalTime,
   }
   lcd.write(byte(126));
   //DEBUG
-  Serial.println("UNARMED: " + (String)*unarmedTotalTime);
-  Serial.println("ARMED: " + (String)*armedTotalTime);
+  //Serial.println("UNARMED: " + (String)*unarmedTotalTime);
+  //Serial.println("ARMED: " + (String)*armedTotalTime);
 }
 
 void printBombStatus(bombDataS* const data)
@@ -70,6 +69,68 @@ void printBombStatus(bombDataS* const data)
   }
 }
 
+void processNoButtonPush(bombDataS* data, ledC* armedLed, ledC* defusedLed, msTimeT currentTime)
+{
+  if(data->isButtonsPushed == true)
+  {
+    data->clearPiontsAndLcd = true;
+  }
+  else
+  {
+    if(data->currentBombStatus == BOMB_ARMED)
+    {
+      defusedLed->turnOff();
+      armedLed->blink(currentTime);
+    }
+    else
+    {
+      armedLed->turnOff();
+      defusedLed->blink(currentTime);
+    }
+  }
+
+  data->isButtonsPushed = false;
+}
+
+void processClearingPoints(const gamemodeBombS* const gm, 
+                           bombDataS* const data,
+                           gamemodeTiming* timing,
+                           classicProgressBarC* armingPG,
+                           classicProgressBarC* defusingPG)
+{
+  if(gm->slowReversing)
+  {
+    if(data->pointsInMs > 0)
+    {
+      data->pointsInMs -= (timing->currentTime - timing->lastCurrentTime);
+      data->noBombStatus = false;
+    }
+    if (data->pointsInMs <= 0)
+    {
+      lcd.setCursor(FIRST_LCD_CHAR, 1);
+      lcd.print("    ");
+      data->pointsInMs = 0;
+      data->noBombStatus = true;
+      data->clearPiontsAndLcd = false;
+    }
+  }
+  else
+  {
+    data->noBombStatus = true;
+    data->pointsInMs = 0;
+    data->clearPiontsAndLcd = false;     
+  }
+  
+  if(data->currentBombStatus == BOMB_UNARMED)
+  {
+    armingPG->calculateProgressAndPrintIfDifferent(data->pointsInMs);
+  }
+  else
+  {
+    defusingPG->calculateProgressAndPrintIfDifferent(data->pointsInMs);
+  }
+}
+
 void saveResult(bombHistoryS* const history, 
                 const msTimeT* const unarmedTotalTime,
                 const msTimeT* const armedTotalTime,
@@ -82,29 +143,27 @@ void saveResult(bombHistoryS* const history,
   history[0].unarmedTotalTime = *unarmedTotalTime;
   history[0].armedTotalTime = *armedTotalTime;
   history[0].bombStatus = bombStatus;
+
   //DEBUG
-  Serial.println("");
-  Serial.println("unarmedTotalTime: " + (String)*unarmedTotalTime);
-  Serial.println("history[0].unarmedTotalTime: " + (String)history[0].unarmedTotalTime);
+  //Serial.println("");
+  //Serial.println("unarmedTotalTime: " + (String)*unarmedTotalTime);
+  //Serial.println("history[0].unarmedTotalTime: " + (String)history[0].unarmedTotalTime);
 }
 
-void processBomb(const gamemodeBombS* const gm) {
-
-
+void processBomb(const gamemodeBombS* const gm)
+{
   // Initialization
   lcd.clear();
   //TODO move to data
-  bool clearPiontsAndBombStatus = false;
-  bool isAllowedToPushButtons = true;
-  msTimeT pushingTime = 0;
+
   gamemodeTiming timing;
   bool isFirstIteration = 1;
 
   bombDataS data;
   memset(&data, 0, sizeof(data));
-
-  //DEBUG
-  printBombGamemodeSettingsOnSerial(gm);
+  data.isAllowedToPushButtons = true;
+  
+  //printBombGamemodeSettingsOnSerial(gm); //DEBUG
 
   lcd.setCursor(0, 0);
   lcd.print("POSILKI");
@@ -113,32 +172,26 @@ void processBomb(const gamemodeBombS* const gm) {
   data.timeToExplosion = gm->explosionTime;
   data.endGameDefaultTime = timing.endgame;
 
-  // 3. LCD prints
-
   classicProgressBarC armingPB(&lcd, gm->armingTime, 10, 6, 1);
   classicProgressBarC defusingPB(&lcd, gm->defusingTime, 10, 6, 1);
   armingPB.calculateProgressAndPrintIfDifferent(data.pointsInMs, FORCE_PRINTING);
-  ledC armedLed(12, 500);
-  ledC defusedLed(13,500);
+  ledC armedLed(12, BLINK_TIME);
+  ledC defusedLed(13,BLINK_TIME);
 
   while (timing.isGameRunning) 
   {
     // 1. Calculating time
-    timing.lastCurrentTime = timing.currentTime;  //DEBUG
+    timing.lastCurrentTime = timing.currentTime;
     timing.currentTime = millis();
-    //Serial.println("currentTime: " + (String)timing.currentTime);
-    
-
     calculateTotalTimes(&timing, &data);
 
 
     //Serial.print("TIMEDIFF: ");
-    unsigned int tmp = (timing.currentTime - timing.lastCurrentTime);
-    Serial.println(tmp);  //DEBUG
+    //unsigned int tmp = (timing.currentTime - timing.lastCurrentTime);
+    //Serial.println(tmp);  //DEBUG
     //Serial.println("CURRENT TIME:" + (String)timing.currentTime);
 
     // 2. Reading game buttons
-    //buttons is set as INPUT_PULLUP mode. If button is pushed digitalRead return 0.
 
     // 2.0 Checking switch status
     if (gm->enableSwitch)
@@ -150,30 +203,35 @@ void processBomb(const gamemodeBombS* const gm) {
     {
       if (!digitalRead(RIGHT_TEAM_BUTTON) && 
           !digitalRead(LEFT_TEAM_BUTTON) && 
-          isAllowedToPushButtons)
+          data.isAllowedToPushButtons)
       {
-        clearPiontsAndBombStatus = false;
-        // Display button push character
+        data.clearPiontsAndLcd = false;
         data.noBombStatus = false;
         printBombStatus(&data);
+
         // continous or first button push
         if (data.isButtonsPushed == true) 
         {
           // Calculating Points
           data.pointsInMs += (timing.currentTime - data.lastPushedButtonTimeStamp);
+
           if(data.currentBombStatus == BOMB_UNARMED)
           {
             armedLed.turnOn();
             defusedLed.turnOff();
+
+            // changing bomb status to BOMB_ARMED.
             if(data.pointsInMs > gm->armingTime)
             {
               data.currentBombStatus = BOMB_ARMED;
               lcd.setCursor(0, 0);
               lcd.print("WYBUCH ");
               data.pointsInMs = 0;
-              clearPiontsAndBombStatus= true;
+              data.clearPiontsAndLcd = true;
               beep();
-              isAllowedToPushButtons = false;
+              data.isAllowedToPushButtons = false;
+
+              // process bomb time reset.
               if(gm->explosionTimeReset)
               {
                 timing.endgame = timing.currentTime + gm->explosionTime;
@@ -183,38 +241,37 @@ void processBomb(const gamemodeBombS* const gm) {
                 timing.endgame = timing.currentTime + data.timeToExplosion;
               }
             }
-            armingPB.calculateProgressAndPrintIfDifferent(data.pointsInMs);
 
+            armingPB.calculateProgressAndPrintIfDifferent(data.pointsInMs);
           }
-          else
+          else // if(data.currentBombStatus == BOMB_ARMED)
           {
             armedLed.turnOff();
             defusedLed.turnOn();
+
             if(data.pointsInMs > gm->defusingTime)
             {
               data.currentBombStatus = BOMB_UNARMED;
               lcd.setCursor(0, 0);
               lcd.print("POSILKI");
               data.pointsInMs = 0;
-              clearPiontsAndBombStatus= true;
+              data.clearPiontsAndLcd = true;
               beep();
-              isAllowedToPushButtons = false;
+              data.isAllowedToPushButtons = false;
+
+              // endGame validation
               if(gm->isDefuseEndGame)
               {
                 timing.isGameRunning = false;
-                lcd.clear();
-                lcd.setCursor(0, 0);
-                lcd.print("ROZBROJONO");
               }
               else
               {
                 timing.endgame = data.endGameDefaultTime;
-                //if(resetczasuwybuchu)
                 data.timeToExplosion = timing.timeLeft;
               }
             }
-              defusingPB.calculateProgressAndPrintIfDifferent(data.pointsInMs);
 
+            defusingPB.calculateProgressAndPrintIfDifferent(data.pointsInMs);
           }
         } 
         else  //first button push
@@ -222,86 +279,36 @@ void processBomb(const gamemodeBombS* const gm) {
           data.isButtonsPushed = true;
         }
 
+        //save button push timestamp
         data.lastPushedButtonTimeStamp = timing.currentTime;
       }
-      else if (digitalRead(RIGHT_TEAM_BUTTON) && digitalRead(LEFT_TEAM_BUTTON) && isAllowedToPushButtons == false)
+      // Bomb status changed and buttond need to be released.
+      else if (digitalRead(RIGHT_TEAM_BUTTON) && 
+               digitalRead(LEFT_TEAM_BUTTON) && 
+               data.isAllowedToPushButtons == false)
       {
-        isAllowedToPushButtons = true;
+        data.isAllowedToPushButtons = true;
       }
-      else
+      else  // no button pushed
       {
-        if(data.isButtonsPushed == true)
-        {
-          clearPiontsAndBombStatus = true;
-        }
-        data.isButtonsPushed = false;
-        //printBombStatus(&data, CLEAR_BOMB_STATUS);
+        processNoButtonPush(&data, &armedLed, &defusedLed, timing.currentTime);
       }
     }
     else  // Blocked by switch
     {
-      if(data.isButtonsPushed == true)
-      {
-        clearPiontsAndBombStatus = true;
-      }
-      data.isButtonsPushed = false;
-      isAllowedToPushButtons = true;
-      //printBombStatus(&data, CLEAR_BOMB_STATUS);
-      //clearButtonsStatus(&data);
+      processNoButtonPush(&data, &armedLed, &defusedLed, timing.currentTime);
+      data.isAllowedToPushButtons = true;
     }
 
-    if(clearPiontsAndBombStatus)
+    if(data.clearPiontsAndLcd)
     {
-      if(gm->slowReversing)
-      {
-        if(data.pointsInMs > 0)
-        {
-          data.pointsInMs -= (timing.currentTime - timing.lastCurrentTime);
-          data.noBombStatus = false;
-        }
-        if (data.pointsInMs <= 0)
-        {
-          lcd.setCursor(FIRST_LCD_CHAR, 1);
-          lcd.print("    ");
-          data.pointsInMs = 0;
-          data.noBombStatus = true;
-          clearPiontsAndBombStatus = false;
-        }
-      }
-      else
-      {
-        data.noBombStatus = true;
-        data.pointsInMs = 0;
-        clearPiontsAndBombStatus = false;     
-      }
-      printBombStatus(&data);
-      if(data.currentBombStatus == BOMB_UNARMED)
-      {
-        armingPB.calculateProgressAndPrintIfDifferent(data.pointsInMs);
-      }
-      else
-      {
-        defusingPB.calculateProgressAndPrintIfDifferent(data.pointsInMs);
-      }
-    }
-    if(!data.isButtonsPushed)
-    {
-      if(data.currentBombStatus == BOMB_ARMED)
-      {
-        defusedLed.turnOff();
-        armedLed.blink(timing.currentTime);
-      }
-      else
-      {
-        armedLed.turnOff();
-        defusedLed.blink(timing.currentTime);
-      }
+      processClearingPoints(gm, &data, &timing, &armingPB, &defusingPB);
     }
 
-    // 4. Endgame weryfication
-    // TODO make functions of this part
+    // Endgame weryfication
     verifyEndGame(&timing, 8, 0);
-  }
+
+  } // end of main loop
 
   saveResult(gm->history,
              &data.unarmedTotalTime,
@@ -334,7 +341,6 @@ void printBombHisotry(const bombHistoryS* const history)
 {
   bool isButtonPushed = true;
   uint8_t historyRecord = 0;
-  Serial.println("history[0].unarmedTotalTime: " + (String)history[0].unarmedTotalTime);
   ledC armedLed(12, 500);
   ledC defusedLed(13, 500);
   while(true)
@@ -382,7 +388,6 @@ void printBombHisotry(const bombHistoryS* const history)
       lcd.setCursor(LAST_LCD_CHAR, 0);
       lcd.print(historyRecord + 1);
       isButtonPushed = false;
-      Serial.println("OK");
     }
   }
 }
