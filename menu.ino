@@ -484,7 +484,7 @@ void printValueOption(const int* const value, bool spaceFill)
 *******************************************************************************/
 void setDefaultGamemodeBomb(gamemodeBombS* gm)
 {
-    gm->gameTime = (0 * HOURS_IN_MS + 2 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
+    gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
     gm->explosionTime = (0 * HOURS_IN_MS + 1 * MINUTES_IN_MS + 20 * SECONDS_IN_MS);
     gm->armingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);
     gm->defusingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);
@@ -805,14 +805,14 @@ void validateStage1_1Position(menuBaseS* menuBase)
       case 0:
         setTime(&menuBase->gamemodeData.gamemodeBomb.gameTime, false);
 
-        if(menuBase->gamemodeData.gamemodeBomb.explosionTime > menuBase->gamemodeData.gamemodeBomb.gameTime) menuBase->gamemodeData.gamemodeBomb.explosionTime = menuBase->gamemodeData.gamemodeBomb.gameTime;
-        if(menuBase->gamemodeData.gamemodeBomb.armingTime > menuBase->gamemodeData.gamemodeBomb.gameTime) menuBase->gamemodeData.gamemodeBomb.armingTime = menuBase->gamemodeData.gamemodeBomb.gameTime;
-        if(menuBase->gamemodeData.gamemodeBomb.defusingTime > menuBase->gamemodeData.gamemodeBomb.gameTime) menuBase->gamemodeData.gamemodeBomb.defusingTime = menuBase->gamemodeData.gamemodeBomb.gameTime;
+        //if(menuBase->gamemodeData.gamemodeBomb.explosionTime > menuBase->gamemodeData.gamemodeBomb.gameTime) menuBase->gamemodeData.gamemodeBomb.explosionTime = menuBase->gamemodeData.gamemodeBomb.gameTime;
+        //if(menuBase->gamemodeData.gamemodeBomb.armingTime > menuBase->gamemodeData.gamemodeBomb.gameTime) menuBase->gamemodeData.gamemodeBomb.armingTime = menuBase->gamemodeData.gamemodeBomb.gameTime;
+        //if(menuBase->gamemodeData.gamemodeBomb.defusingTime > menuBase->gamemodeData.gamemodeBomb.gameTime) menuBase->gamemodeData.gamemodeBomb.defusingTime = menuBase->gamemodeData.gamemodeBomb.gameTime;
 
         break;
       case 1:
 
-        setTime(&menuBase->gamemodeData.gamemodeBomb.explosionTime, true, menuBase->gamemodeData.gamemodeBomb.gameTime);
+        setTime(&menuBase->gamemodeData.gamemodeBomb.explosionTime, true);
         break;
 
       case 2:

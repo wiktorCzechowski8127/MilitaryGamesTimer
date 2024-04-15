@@ -36,7 +36,8 @@ struct gamemodeTiming
   uint8_t isUnlimitedTime: 1;
   uint8_t turnSpeakerAlarmOn: 1;
   uint8_t endButtonsKeepPushed: 1;
-  uint8_t padding: 4;
+  uint8_t invertTime: 1;
+  uint8_t padding: 3;
 };
 
 /* > Functions ****************************************************************/
@@ -44,7 +45,7 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing);
 
-void verifyEndGame(gamemodeTiming* timing, uint8_t lcdpos1, uint8_t lcdpos2);
+void verifyEndGame(gamemodeTiming* timing);
 void processGameSummary(gamemodeTiming* timing);
 
 #endif

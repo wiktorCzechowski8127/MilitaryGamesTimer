@@ -2,7 +2,7 @@
 
 void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametime, const msTimeT* const alarmSpeakerTime)
 {
-  memset(timing, 0, sizeof(timing));
+  memset(timing, 0, sizeof(gamemodeTiming));
   timing->isGameRunning = true;
   timing->currentTime = millis();
   if(*gametime == 0)
@@ -19,7 +19,7 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
   timing->lastCurrentTime = timing->currentTime; //DEBUG
   timing->alarmSpeakerEnd = *alarmSpeakerTime;
   //DEBUG
-  /*
+  
   Serial.println("");
   Serial.println("GAMEMODE");    
   Serial.println("endgame: " + (String)timing->endgame);
@@ -28,22 +28,25 @@ void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametim
   Serial.println("lastCurrentTime: " + (String)timing->lastCurrentTime);
   Serial.println("alarmSpeakerEnd: " + (String)timing->alarmSpeakerEnd);
   Serial.println("isUnlimitedTime: " + (String)timing->isUnlimitedTime);
-  Serial.println("turnSpeakerAlarmOn: " + (String)timing->turnSpeakerAlarmOn);\
-  */
+  Serial.println("turnSpeakerAlarmOn: " + (String)timing->turnSpeakerAlarmOn);
+  Serial.println("invertTime: " + (String)timing->invertTime);
+  
 }
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
 {
   bool isGameRunning = true;
-  if(timing->currentTime > timing->endgame && timing->isUnlimitedTime == false)
+  if(timing->currentTime > timing->endgame &&
+     timing->invertTime == false)
   {
+    Serial.println("ENTER PIXA");
     isGameRunning = false;
     timing->timeLeft = 0;
     timing->turnSpeakerAlarmOn = true;
   }
   else
   {
-    if(timing->isUnlimitedTime == true)
+    if(timing->invertTime == true)
     {
       timing->timeLeft = timing->currentTime - timing->endgame;
     }
@@ -57,13 +60,10 @@ bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
   return isGameRunning;
 }
 
-void verifyEndGame(gamemodeTiming* timing, uint8_t lcdpos1, uint8_t lcdpos2)
+void verifyEndGame(gamemodeTiming* timing)
 {
   if (timing->isGameRunning == true) 
   {
-    lcd.setCursor(lcdpos1,lcdpos2);
-    timing->isGameRunning = valideateEndGameOrPrintTimeLeft(timing);
-
     // Turning game off using buttons.
     timing->endButtonsKeepPushed = false;
     if (!digitalRead(LEFT_BUTTON) && !digitalRead(RIGHT_BUTTON))

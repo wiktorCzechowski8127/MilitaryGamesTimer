@@ -46,7 +46,4 @@ void ledC::blink(uint32_t currentTime)
     _ledStatus = !_ledStatus;
     digitalWrite(_pin, _ledStatus);
   }
-  Serial.print(currentTime);
-  Serial.print(" - ");
-  Serial.println(_nextBlink);
 }

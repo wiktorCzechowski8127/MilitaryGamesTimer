@@ -37,7 +37,14 @@ void changeBombStatus(const gamemodeBombS* const gm,
 
   if(data->currentBombStatus == BOMB_UNARMED)
   {
-    lcd.print("POSILKI");
+    if (timing->isUnlimitedTime)
+    {
+      lcd.print("       ");
+    }
+    else
+    {
+      lcd.print("POSILKI");     
+    }
     // endGame validation
     if(gm->isDefuseEndGame)
     {
@@ -51,7 +58,7 @@ void changeBombStatus(const gamemodeBombS* const gm,
   }
   else
   {
-    lcd.print("WYBUCH ");
+    lcd.print("WYBUCH  ");
     if(gm->explosionTimeReset)
     {
       timing->endgame = timing->currentTime + gm->explosionTime;
@@ -207,11 +214,14 @@ void processBomb(const gamemodeBombS* const gm)
   gamemodeTiming timing;
   initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker);
 
+  if (timing.isUnlimitedTime == 0)
+  {
+    lcd.setCursor(0, 0);
+    lcd.print("POSILKI");
+  }
+  
   bombDataS data;
   initializeData(&data, gm, &timing);
-
-  lcd.setCursor(0, 0);
-  lcd.print("POSILKI");
 
   classicProgressBarC armingPB(&lcd, gm->armingTime, 10, 6, 1);
   classicProgressBarC defusingPB(&lcd, gm->defusingTime, 10, 6, 1);
@@ -287,7 +297,7 @@ void processBomb(const gamemodeBombS* const gm)
         {
           data.isButtonsPushed = true;
         }
-        
+
         data.lastPushedButtonTimeStamp = timing.currentTime;
       }
       // Bomb status changed and buttond need to be released.
@@ -314,7 +324,19 @@ void processBomb(const gamemodeBombS* const gm)
     }
 
     // Endgame weryfication
-    verifyEndGame(&timing, 8, 0);
+    // if unlimited time and bomb unarmed skip verification
+    if (((timing.isUnlimitedTime == true) && (data.currentBombStatus == BOMB_UNARMED)) && (timing.isGameRunning == true))
+    {
+      lcd.setCursor(0, 0);
+      lcd.print("BOMBA NIEBROJONA");
+    }
+    else
+    {
+      lcd.setCursor(8,0);
+      timing.isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
+    }
+
+    verifyEndGame(&timing);
   } // end of main loop
 
   // Game end process

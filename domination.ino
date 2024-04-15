@@ -9,13 +9,19 @@ void printWinningPoints(const unsigned int* const leftTeamWinningPoints, const u
   uint8_t rightLcdPos = LAST_LCD_CHAR;
   String stringToPrint = (String)*rightTeamWinningPoints;
 
-  if ((*rightTeamWinningPoints >= 10) && (*rightTeamWinningPoints < 100)) {
+  if ((*rightTeamWinningPoints >= 10) && (*rightTeamWinningPoints < 100))
+  {
     rightLcdPos -= 1;
-  } else if ((*rightTeamWinningPoints >= 100) && (*rightTeamWinningPoints < 1000)) {
+  } else if ((*rightTeamWinningPoints >= 100) && (*rightTeamWinningPoints < 1000))
+  {
     rightLcdPos -= 2;
-  } else if ((*rightTeamWinningPoints > 1000) && (printOnLowerPart == true)) {
+  }
+  else if ((*rightTeamWinningPoints > 1000) && (printOnLowerPart == true))
+  {
     rightLcdPos -= 3;
-  } else if ((*rightTeamWinningPoints > 1000) && (printOnLowerPart == false)) {
+  } 
+  else if ((*rightTeamWinningPoints > 1000) && (printOnLowerPart == false))
+  {
     rightLcdPos -= 2;
     stringToPrint = WINNING_POINTS_OUT_OF_RANGE;
   }
@@ -170,7 +176,11 @@ void processDomination(gamemodeDominationS* const gm)
 
   gamemodeTiming timing;
   initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker);
-
+  if (timing.isUnlimitedTime)
+  {
+    timing.invertTime = 1;
+  }
+  
   dominationDataS data;
   memset(&data, 0, sizeof(data));
 
@@ -297,7 +307,12 @@ void processDomination(gamemodeDominationS* const gm)
     ledBlink(gm, &data, timing.currentTime, &leftLed, &rightLed);
 
     timing.isGameRunning = calcWinningPointsAndCheckIsGameEnd(&timing, &data, gm);
-    verifyEndGame(&timing, 4, 0);
+
+    lcd.setCursor(4,0);
+    timing.isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
+    
+
+    verifyEndGame(&timing);
   }  // End of main loop
 
   // End game porcess
