@@ -510,13 +510,13 @@ void setDefaultGamemodeBomb(gamemodeBombS* gm)
 *******************************************************************************/
 void setDefaultGamemodeDomination(gamemodeDominationS* gm)
 {
-    gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
-    gm->fullTakeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 10 * SECONDS_IN_MS);
-    gm->takeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 2 * SECONDS_IN_MS);
-    gm->pointTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);
+    gm->gameTime = (1 * HOURS_IN_MS + 30 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
+    gm->fullTakeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
+    gm->takeOverTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 5 * SECONDS_IN_MS);
+    gm->pointTime = (0 * HOURS_IN_MS + 1 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
     gm->enableSwitch = false;
     gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
-    gm->winningPointsLimit = 45;
+    gm->winningPointsLimit = 0;
 
     memset(&gm->history, 
            0,

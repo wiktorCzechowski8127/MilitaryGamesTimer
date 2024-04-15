@@ -220,7 +220,7 @@ void twoDeviationProgressBarC::generateProgressBarLayout()
     _specialValuePlace = round(LCD_HALF * ((float)_specialValue / _maxValue));
 
 
-    if (_specialValuePlace == 0) 
+    if (_specialValuePlace == 0 || _specialValuePlace == 1) 
     {
       _progressBarLayout[7] = CHAR_TWO_STRIPS;
       _progressBarLayout[8] = CHAR_TWO_STRIPS;
