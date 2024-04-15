@@ -250,7 +250,6 @@ void processBomb(const gamemodeBombS* const gm)
         data.noBombStatus = false;
         printBombStatus(&data);
         //save button push timestamp
-        data.lastPushedButtonTimeStamp = timing.currentTime;
 
         // Continous button push
         if (data.isButtonsPushed == true) 
@@ -288,6 +287,8 @@ void processBomb(const gamemodeBombS* const gm)
         {
           data.isButtonsPushed = true;
         }
+        
+        data.lastPushedButtonTimeStamp = timing.currentTime;
       }
       // Bomb status changed and buttond need to be released.
       else if (digitalRead(RIGHT_TEAM_BUTTON) && 
