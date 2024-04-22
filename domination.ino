@@ -308,11 +308,16 @@ void processDomination(gamemodeDominationS* const gm)
 
     timing.isGameRunning = calcWinningPointsAndCheckIsGameEnd(&timing, &data, gm);
 
-    lcd.setCursor(4,0);
-    timing.isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
-    
+    if(timing.isGameRunning)
+    {
+      lcd.setCursor(4,0);
+      timing.isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
+    } 
 
-    verifyEndGame(&timing);
+    if(timing.isGameRunning)
+    {
+      verifyEndGame(&timing);
+    }
   }  // End of main loop
 
   // End game porcess

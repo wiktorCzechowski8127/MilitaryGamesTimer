@@ -332,11 +332,16 @@ void processBomb(const gamemodeBombS* const gm)
     }
     else
     {
-      lcd.setCursor(8,0);
-      timing.isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
+      if (timing.isGameRunning)
+      {
+        lcd.setCursor(8,0);
+        timing.isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
+      }
     }
-
-    verifyEndGame(&timing);
+    if (timing.isGameRunning)
+    {
+      verifyEndGame(&timing);
+    }
   } // end of main loop
 
   // Game end process
