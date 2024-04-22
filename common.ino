@@ -1,6 +1,13 @@
 #include "common.hpp"
 
-
+/* > Function waitUntilButtonReleased
+*******************************************************************************/
+/**
+ * @brief Loop that ends while menu left and right button released.
+ * 
+ * @return void
+ * 
+*******************************************************************************/
 void waitUntilButtonReleased()
 {
   while(true)
@@ -29,13 +36,13 @@ void convert3varToMs(humanTimeT hours,
                      humanTimeT seconds,
                      msTimeT* timeInMs)
 {
-    *timeInMs = (hours * HOURS_IN_MS + minutes * MINUTES_IN_MS + seconds * SECONDS_IN_MS);
+  *timeInMs = (hours * HOURS_IN_MS + minutes * MINUTES_IN_MS + seconds * SECONDS_IN_MS);
 }
 
 /* > Function printTime
 *******************************************************************************/
 /**
- * @brief Printing time of option on lcd.
+ * @brief Printing time on lcd.
  * 
  * @param[in] timeInMs      Time in Ms to print.
  * @param[in] minutesOlny   Printing time without hours.

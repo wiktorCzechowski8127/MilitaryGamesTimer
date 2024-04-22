@@ -316,7 +316,7 @@ void processDomination(gamemodeDominationS* const gm)
 
     if(timing.isGameRunning)
     {
-      verifyEndGame(&timing);
+      checkGameInterrupt(&timing);
     }
   }  // End of main loop
 

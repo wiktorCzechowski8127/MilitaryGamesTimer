@@ -1,14 +1,16 @@
-#include <stdint.h>
 #ifndef GAMEMODE_COMMON
 #define GAMEMODE_COMMON
 
 /* > Include  *****************************************************************/
+#include <stdint.h>
 #include "common.hpp"
 #include <LiquidCrystal_I2C.h>
 
 /* > Defines ******************************************************************/
 #define MAX_HISTORY_RECORDS 3
 #define BLINK_TIME 500
+#define INTERRUPT_TIME 2000
+
 /* > Typedefs *****************************************************************/
 
 /* > Externs ******************************************************************/
@@ -27,7 +29,7 @@ extern bool RELAY_OFF;
 struct gamemodeTiming
 {   
   msTimeT endgame;
-  msTimeT timeLeft;
+  msTimeT timeLeft; // When invertTime == true this parameter calculate time elapsed since the start.
   msTimeT currentTime;
   msTimeT lastCurrentTime;
   msTimeT alarmSpeakerEnd;
@@ -41,11 +43,14 @@ struct gamemodeTiming
 };
 
 /* > Functions ****************************************************************/
-void initializeTiming(gamemodeTiming* timing, const unsigned long* const gametime, const msTimeT* const alarmSpeakerTime);
+void initializeTiming(gamemodeTiming* timing,
+                      const unsigned long* const gametime,
+                      const msTimeT* const alarmSpeakerTime);
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing);
 
-void verifyEndGame(gamemodeTiming* timing);
+void checkGameInterrupt(gamemodeTiming* timing);
+
 void processGameSummary(gamemodeTiming* timing);
 
 #endif

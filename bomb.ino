@@ -340,7 +340,7 @@ void processBomb(const gamemodeBombS* const gm)
     }
     if (timing.isGameRunning)
     {
-      verifyEndGame(&timing);
+      checkGameInterrupt(&timing);
     }
   } // end of main loop
 
