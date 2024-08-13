@@ -10,7 +10,7 @@ The device is based on the Arduino Uno controller.
 
 ![](docs/militaryGameTimerPhoto2.jpg)
 
-<h2>Electric diagram::</h2>
+<h2>Electric diagram:</h2>
 
 ![](docs/militaryGameTimerSchema.jpg)
 
