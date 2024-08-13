@@ -6,7 +6,11 @@ The electrical diagram and user manual (only in Polish) can be found in the "dos
 
 The device is based on the Arduino Uno controller.
 
-![](docs/militaryGameTimerPhoto1.jpg)
+<h2>General photo:</h2>
 
-![](docs/militaryGameTimerPhoto1.jpg)
+![](docs/militaryGameTimerPhoto2.jpg)
+
+<h2>Electric diagram::</h2>
+
+![](docs/militaryGameTimerSchema.jpg)
 
