@@ -8,3 +8,5 @@ The device is based on the Arduino Uno controller.
 
 ![](docs/militaryGameTimerPhoto1.jpg)
 
+![](docs/militaryGameTimerPhoto1.jpg)
+
