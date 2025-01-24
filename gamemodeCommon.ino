@@ -12,7 +12,8 @@
 *******************************************************************************/
 void initializeTiming(gamemodeTiming* timing,
                       const unsigned long* const gametime,
-                      const msTimeT* const alarmSpeakerTime)
+                      const msTimeT* const alarmSpeakerTime,
+                      const msTimeT delayAlarmStop)
 {
   memset(timing, 0, sizeof(gamemodeTiming));
 
@@ -33,7 +34,7 @@ void initializeTiming(gamemodeTiming* timing,
   timing->timeLeft = 0;
   timing->lastCurrentTime = timing->currentTime;
   timing->alarmSpeakerEnd = *alarmSpeakerTime;
-
+  timing->delayAlarmStop = delayAlarmStop;
   //DEBUG
   /*
   Serial.println("");
@@ -83,6 +84,11 @@ bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
       timing->timeLeft = timing->endgame - timing->currentTime;
     }
     printTime(&timing->timeLeft, false);
+
+    if(timing->currentTime > timing->delayAlarmStop)
+    {
+      digitalWrite(RELAY, RELAY_OFF);
+    }
     //Serial.println(timing->timeLeft); //DEBUG
   }
   return isGameRunning;
@@ -96,10 +102,10 @@ bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing)
  * 
  * @param[in] timing      Pointer to gamemodeTiming structure.
  *
- * @return void
+ * @return bool
  * 
 *******************************************************************************/
-void checkGameInterrupt(gamemodeTiming* timing)
+bool checkGameInterrupt(gamemodeTiming* timing)
 {
   if (timing->isGameRunning == true) 
   {
@@ -123,6 +129,8 @@ void checkGameInterrupt(gamemodeTiming* timing)
       {
         timing->isGameRunning = false;
         timing->turnSpeakerAlarmOn = false;
+        digitalWrite(RELAY, RELAY_OFF);
+        return true;
       }
     } 
     else
@@ -130,6 +138,7 @@ void checkGameInterrupt(gamemodeTiming* timing)
       timing->buttonPushingTime = 0;
     }
   }
+  return false;
 }
 
 /* > Function processGameSummary
@@ -204,4 +213,49 @@ void processGameSummary(gamemodeTiming* timing)
     }
     //Serial.println("MILLIS: " + String(millis()) + " ALARM SPEAKER END " + String(timing.alarmSpeakerEnd));
   }
+}
+
+
+/* > Function delayStart
+*******************************************************************************/
+/**
+ * @brief Processing delay start time
+ * 
+ * @return void
+ * 
+*******************************************************************************/
+msTimeT delayStart(const msTimeT delayTime)
+{
+  bool stopedByInterrupt = false;
+  msTimeT alarm = 0;
+  if(delayTime != 0)
+  {
+    gamemodeTiming timing;
+    initializeTiming(&timing, &delayTime, &alarm, 0);
+    while(timing.isGameRunning)
+    {
+      timing.currentTime = millis();
+
+      if(timing.isGameRunning)
+      {
+        lcd.setCursor(4,0);
+        lcd.print("START ZA");
+        lcd.setCursor(4,1);
+        timing.isGameRunning = valideateEndGameOrPrintTimeLeft(&timing);
+        stopedByInterrupt = checkGameInterrupt(&timing);
+      }
+    }
+
+    if(stopedByInterrupt)
+    {
+      digitalWrite(RELAY, RELAY_OFF);
+      return 0;
+    }
+    else
+    {
+      digitalWrite(RELAY, RELAY_ON);
+      return timing.currentTime + (30 * SECONDS_IN_MS);
+    }
+  }
+  return 0;
 }

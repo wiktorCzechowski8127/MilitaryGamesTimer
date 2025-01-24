@@ -484,13 +484,15 @@ void printValueOption(const int* const value, bool spaceFill)
 *******************************************************************************/
 void setDefaultGamemodeBomb(gamemodeBombS* gm)
 {
-    gm->gameTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
+    gm->gameTime = (0 * HOURS_IN_MS + 30 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
     gm->explosionTime = (0 * HOURS_IN_MS + 1 * MINUTES_IN_MS + 20 * SECONDS_IN_MS);
     gm->armingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);
     gm->defusingTime = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 1 * SECONDS_IN_MS);
     gm->enableSwitch = true;
     gm->slowReversing = false;
     gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
+    gm->delayStart = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 15 * SECONDS_IN_MS);
+    
     gm->isDefuseEndGame = false;
     gm->explosionTimeReset = false;
 
@@ -516,7 +518,8 @@ void setDefaultGamemodeDomination(gamemodeDominationS* gm)
     gm->pointTime = (0 * HOURS_IN_MS + 1 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
     gm->enableSwitch = false;
     gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
-    gm->winningPointsLimit = 0;
+    gm->winningPointsLimit = 61;
+    gm->delayStart = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 15 * SECONDS_IN_MS);
 
     memset(&gm->history, 
            0,
@@ -583,35 +586,40 @@ void printBombOptions(const menuBaseS* const menuBase)
             lcd.print("ROZBRAJANIE");
             break;
         case 4:
+            printTime(&menuBase->gamemodeData.gamemodeBomb.delayStart, true);
+            lcd.setCursor(3,0);
+            lcd.print("OPOZN. START");
+          break;
+        case 5:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
             lcd.setCursor(3,0);
             lcd.print("PRZELACZNIK");
             break;
-        case 5:
+        case 6:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
             lcd.setCursor(3,0);
             lcd.print("ROZ. KONCZY");
             break;
-        case 6:
+        case 7:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.explosionTimeReset);
             lcd.setCursor(3,0);
             lcd.print("RES.CZAS.EKS");
             break;
-        case 7:
+        case 8:
             printBoolOption(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
             lcd.setCursor(3,0);
             lcd.print("COFANIE PROG.");
             break;
-        case 8:
+        case 9:
             printTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, false);
             lcd.setCursor(3,0);
             lcd.print("SYRENA");
             break;
-        case 9:
+        case 10:
             lcd.setCursor(3,0);
             lcd.print("HISTORIA");
             break;
-        case 10:
+        case 11:
             lcd.setCursor(3,0);
             lcd.print("START");
             break;
@@ -665,20 +673,25 @@ void printDominationOptions(const menuBaseS* const menuBase)
             lcd.print("LIMIT PUNKOW");
             break;
         case 5:
+            printTime(&menuBase->gamemodeData.gamemodeDomination.delayStart, true);
+            lcd.setCursor(3,0);
+            lcd.print("OPOZN. START");
+            break;
+        case 6:
             printBoolOption(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
             lcd.setCursor(3,0);
             lcd.print("PRZELACZNIK");
             break;
-        case 6:
+        case 7:
             printTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, false);
             lcd.setCursor(3,0);
             lcd.print("SYRENA");
             break;
-        case 7:
+        case 8:
             lcd.setCursor(3,0);
             lcd.print("HISTORIA");
             break;
-        case 8:
+        case 9:
             lcd.setCursor(3,0);
             lcd.print("START");
             break;
@@ -826,27 +839,29 @@ void validateStage1_1Position(menuBaseS* menuBase)
         setTime(&menuBase->gamemodeData.gamemodeBomb.defusingTime, true);
         if(menuBase->gamemodeData.gamemodeBomb.defusingTime == 0) menuBase->gamemodeData.gamemodeBomb.defusingTime = 10;
         break;
-
       case 4:
-        setBoolean(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
+        setTime(&menuBase->gamemodeData.gamemodeBomb.delayStart, true);
         break;
       case 5:
-        setBoolean(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
+        setBoolean(&menuBase->gamemodeData.gamemodeBomb.enableSwitch);
         break;
       case 6:
-        setBoolean(&menuBase->gamemodeData.gamemodeBomb.explosionTimeReset);
+        setBoolean(&menuBase->gamemodeData.gamemodeBomb.isDefuseEndGame);
         break;
       case 7:
-        setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
+        setBoolean(&menuBase->gamemodeData.gamemodeBomb.explosionTimeReset);
         break;
       case 8:
-        setTime(&menuBase->gamemodeData.gamemodeBomb.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
+        setBoolean(&menuBase->gamemodeData.gamemodeBomb.slowReversing);
         break;
       case 9:
-        printBombHisotry(menuBase->gamemodeData.gamemodeBomb.history);
+        setTime(&menuBase->gamemodeData.gamemodeBomb.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
         break;
       case 10:
-        startGame(menuBase);;
+        printBombHisotry(menuBase->gamemodeData.gamemodeBomb.history);
+        break;
+      case 11:
+        startGame(menuBase);
         break;    
       default:
         break;
@@ -944,16 +959,19 @@ void validateStage1_2Position(menuBaseS* menuBase)
               menuBase->gamemodeData.gamemodeDomination.winningPointsLimit = 30000;
             }
             break;
-        case 5: // switch
+        case 5:
+            setTime(&menuBase->gamemodeData.gamemodeDomination.delayStart, true);
+            break;
+        case 6: // switch
             setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
             break;
-        case 6: // alarm Speaker
+        case 7: // alarm Speaker
             setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
             break;
-        case 7:
+        case 8:
             printDominationHisotry(menuBase->gamemodeData.gamemodeDomination.history);
             break;
-        case 8:
+        case 9:
             startGame(menuBase);
             break;
         default:

@@ -49,6 +49,7 @@ struct gamemodeBombS
     msTimeT defusingTime;
     msTimeT alarmSpeaker;
     msTimeT explosionTime;
+    msTimeT delayStart;
     bool enableSwitch;
     bool slowReversing;
     bool isDefuseEndGame;

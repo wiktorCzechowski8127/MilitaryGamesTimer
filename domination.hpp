@@ -57,6 +57,7 @@ struct gamemodeDominationS
   msTimeWithSingT takeOverTime;
   msTimeT pointTime;
   unsigned int winningPointsLimit;
+  msTimeT delayStart;
   bool enableSwitch;
   msTimeT alarmSpeaker;
   dominationHistoryS history[MAX_HISTORY_RECORDS];

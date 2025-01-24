@@ -34,6 +34,7 @@ struct gamemodeTiming
   msTimeT lastCurrentTime;
   msTimeT alarmSpeakerEnd;
   msTimeT buttonPushingTime;
+  msTimeT delayAlarmStop;
   uint8_t isGameRunning: 1;
   uint8_t isUnlimitedTime: 1;
   uint8_t turnSpeakerAlarmOn: 1;
@@ -45,12 +46,15 @@ struct gamemodeTiming
 /* > Functions ****************************************************************/
 void initializeTiming(gamemodeTiming* timing,
                       const unsigned long* const gametime,
-                      const msTimeT* const alarmSpeakerTime);
+                      const msTimeT* const alarmSpeakerTime,
+                      const msTimeT delayAlarmStop);
 
 bool valideateEndGameOrPrintTimeLeft(gamemodeTiming* timing);
 
-void checkGameInterrupt(gamemodeTiming* timing);
+bool checkGameInterrupt(gamemodeTiming* timing);
 
 void processGameSummary(gamemodeTiming* timing);
+
+msTimeT delayStart(const msTimeT delayTime);
 
 #endif

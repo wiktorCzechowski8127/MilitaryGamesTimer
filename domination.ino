@@ -174,8 +174,12 @@ void processDomination(gamemodeDominationS* const gm)
   // Initialization
   lcd.clear();
 
+
   gamemodeTiming timing;
-  initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker);
+  initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker, delayStart(gm->delayStart));
+
+  lcd.clear();
+
   if (timing.isUnlimitedTime)
   {
     timing.invertTime = 1;
@@ -201,7 +205,7 @@ void processDomination(gamemodeDominationS* const gm)
     //Serial.println("TIMEDIFF: " + (String)(timing.currentTime - timing.lastCurrentTime));  //DEBUG
     //Serial.println("CURRENT TIME:" + (String)timing.currentTime);
     timing.lastCurrentTime = timing.currentTime;  //DEBUG checked
-
+    
     // Checking switch status
     if (gm->enableSwitch)
     {
@@ -317,6 +321,7 @@ void processDomination(gamemodeDominationS* const gm)
     if(timing.isGameRunning)
     {
       checkGameInterrupt(&timing);
+      
     }
   }  // End of main loop
 

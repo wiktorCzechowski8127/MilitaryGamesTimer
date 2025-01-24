@@ -212,8 +212,9 @@ void processBomb(const gamemodeBombS* const gm)
   lcd.clear();
 
   gamemodeTiming timing;
-  initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker);
-
+  initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker, delayStart(gm->delayStart));
+  
+  lcd.clear();
   if (timing.isUnlimitedTime == 0)
   {
     lcd.setCursor(0, 0);
