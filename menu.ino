@@ -519,7 +519,8 @@ void setDefaultGamemodeDomination(gamemodeDominationS* gm)
     gm->enableSwitch = false;
     gm->alarmSpeaker = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 30 * SECONDS_IN_MS);
     gm->winningPointsLimit = 61;
-    gm->delayStart = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 15 * SECONDS_IN_MS);
+    gm->delayStart = (0 * HOURS_IN_MS + 0 * MINUTES_IN_MS + 0 * SECONDS_IN_MS);
+    gm->pressButtonToStartGame = true;
 
     memset(&gm->history, 
            0,
@@ -673,25 +674,30 @@ void printDominationOptions(const menuBaseS* const menuBase)
             lcd.print("LIMIT PUNKOW");
             break;
         case 5:
+            printBoolOption(&menuBase->gamemodeData.gamemodeDomination.pressButtonToStartGame);
+            lcd.setCursor(3,0);
+            lcd.print("PRZYC. START");
+          break;
+        case 6:
             printTime(&menuBase->gamemodeData.gamemodeDomination.delayStart, true);
             lcd.setCursor(3,0);
             lcd.print("OPOZN. START");
             break;
-        case 6:
+        case 7:
             printBoolOption(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
             lcd.setCursor(3,0);
             lcd.print("PRZELACZNIK");
             break;
-        case 7:
+        case 8:
             printTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, false);
             lcd.setCursor(3,0);
             lcd.print("SYRENA");
             break;
-        case 8:
+        case 9:
             lcd.setCursor(3,0);
             lcd.print("HISTORIA");
             break;
-        case 9:
+        case 10:
             lcd.setCursor(3,0);
             lcd.print("START");
             break;
@@ -960,18 +966,29 @@ void validateStage1_2Position(menuBaseS* menuBase)
             }
             break;
         case 5:
-            setTime(&menuBase->gamemodeData.gamemodeDomination.delayStart, true);
+            setBoolean(&menuBase->gamemodeData.gamemodeDomination.pressButtonToStartGame);
+            if(menuBase->gamemodeData.gamemodeDomination.pressButtonToStartGame)
+            {
+              menuBase->gamemodeData.gamemodeDomination.delayStart = 0;
+            }
             break;
-        case 6: // switch
+        case 6:
+            setTime(&menuBase->gamemodeData.gamemodeDomination.delayStart, true);
+            if(menuBase->gamemodeData.gamemodeDomination.delayStart)
+            {
+              menuBase->gamemodeData.gamemodeDomination.pressButtonToStartGame = false;
+            }
+            break;
+        case 7: // switch
             setBoolean(&menuBase->gamemodeData.gamemodeDomination.enableSwitch);
             break;
-        case 7: // alarm Speaker
+        case 8: // alarm Speaker
             setTime(&menuBase->gamemodeData.gamemodeDomination.alarmSpeaker, true, ALARM_SPEAKER_MAX_TIME);
             break;
-        case 8:
+        case 9:
             printDominationHisotry(menuBase->gamemodeData.gamemodeDomination.history);
             break;
-        case 9:
+        case 10:
             startGame(menuBase);
             break;
         default:

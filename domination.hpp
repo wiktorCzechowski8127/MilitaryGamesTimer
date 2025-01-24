@@ -60,6 +60,7 @@ struct gamemodeDominationS
   msTimeT delayStart;
   bool enableSwitch;
   msTimeT alarmSpeaker;
+  bool pressButtonToStartGame;
   dominationHistoryS history[MAX_HISTORY_RECORDS];
 };
 

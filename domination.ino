@@ -171,9 +171,24 @@ void saveResult(dominationHistoryS* const history,
 
 void processDomination(gamemodeDominationS* const gm)
 {
-  // Initialization
   lcd.clear();
 
+  dominationDataS data;
+  memset(&data, 0, sizeof(data));
+
+  twoDeviationProgressBarC progressBar(&lcd, gm->fullTakeOverTime, gm->takeOverTime, 1);
+  progressBar.calculateProgressAndPrintIfDifferent(data.pointsInMs, FORCE_PRINTING);
+
+  printWinningPoints(&data.leftTeamWinningPoints, &data.rightTeamWinningPoints, false);
+
+  lcd.setCursor(4,0);
+  printTime(&gm->gameTime, false);
+
+  if(gm->pressButtonToStartGame)
+  {
+    bool switchState = digitalRead(SWITCH);
+    while(digitalRead(RIGHT_TEAM_BUTTON) && digitalRead(LEFT_TEAM_BUTTON) && (digitalRead(SWITCH) == switchState));
+  }
 
   gamemodeTiming timing;
   initializeTiming(&timing, &gm->gameTime, &gm->alarmSpeaker, delayStart(gm->delayStart));
@@ -184,16 +199,9 @@ void processDomination(gamemodeDominationS* const gm)
   {
     timing.invertTime = 1;
   }
-  
-  dominationDataS data;
-  memset(&data, 0, sizeof(data));
 
-  twoDeviationProgressBarC progressBar(&lcd, gm->fullTakeOverTime, gm->takeOverTime, 1);
+  // twoDeviationProgressBarC progressBar(&lcd, gm->fullTakeOverTime, gm->takeOverTime, 1);
   progressBar.calculateProgressAndPrintIfDifferent(data.pointsInMs, FORCE_PRINTING);
-
-  ledC leftLed(RED_LED, BLINK_TIME);
-  ledC rightLed(BLUE_LED, BLINK_TIME);
-  
   printWinningPoints(&data.leftTeamWinningPoints, &data.rightTeamWinningPoints, false);
   //printGamemodeSettingsOnSerial(gm); //DEBUG
 
