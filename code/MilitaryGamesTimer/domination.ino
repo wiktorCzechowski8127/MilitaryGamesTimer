@@ -173,6 +173,9 @@ void processDomination(gamemodeDominationS* const gm)
 {
   lcd.clear();
 
+  ledC leftLed(RED_LED, BLINK_TIME);
+  ledC rightLed(BLUE_LED, BLINK_TIME);
+
   dominationDataS data;
   memset(&data, 0, sizeof(data));
 
